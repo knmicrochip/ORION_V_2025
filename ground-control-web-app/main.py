@@ -16,7 +16,19 @@ mqtt_client = MqttClient()
 
 # Global content area reference
 content_area = None
-telemetry_area = None
+
+@ui.refreshable
+def menu_content(active_pane: str):
+    menu(switch_pane, active_pane)
+
+@ui.refreshable
+def telemetry_content(mode: str, payload: dict = None):
+    ui.label(f"Mode: {mode}").classes('text-lg font-semibold')
+    if payload:
+        for key, value in payload.items():
+            ui.label(f"{key}: {value}")
+    else:
+        ui.label(f"{mode} functionality is not implemented yet").classes('text-md')
 
 def switch_pane(pane_name: str):
     """Clears the content area and loads the selected pane."""
@@ -32,34 +44,38 @@ def switch_pane(pane_name: str):
         if pane_name == 'chassis':
             chassis_pane(state, mqtt_client)
             state.active_topic = MQTT_TOPICS['chassis_output']
-            state.telemetry_callback = lambda topic, payload: telemetry_area.set_text(f"Telemetry: {payload}")
+            state.telemetry_callback = lambda topic, payload: telemetry_content.refresh('Chassis', payload)
             mqtt_client.subscribe(state.active_topic, state.telemetry_callback)
         elif pane_name == 'manipulator':
             manipulator_pane()
+            telemetry_content.refresh('Manipulator')
         elif pane_name == 'science':
             science_pane()
+            telemetry_content.refresh('Science')
+    menu_content.refresh(pane_name) # Refresh the menu to highlight the active pane
 
 # Main UI Layout
 @ui.page('/')
 def main_page():
-    global content_area, telemetry_area
+    global content_area
 
     # Left side: Collapsible Menu (direct child of page)
     with ui.left_drawer().classes('bg-gray-200 p-4') as left_drawer:
-        menu(switch_pane)
+        menu_content('chassis') # Initial active pane
 
     # Main content area (fills remaining space)
     with ui.column().classes('w-full h-screen no-wrap'): # Use h-screen to fill vertical space
         # Button to toggle the left drawer (always visible, positioned absolutely)
         ui.button(icon='menu', on_click=left_drawer.toggle).props('flat fab-mini absolute-top-left')
 
-        # Top section: Playground (fills remaining space after button)
+        # Top section: Playground (fills remaining space in this row)
         with ui.row().classes('w-full flex-grow no-wrap'): # flex-grow to take available height
             # Playground pane (fills remaining space in this row)
             content_area = ui.column().classes('flex-grow h-full') # flex-grow to take remaining width, full height of this row
 
         # Bottom section: Telemetry Pane (full width at the very bottom)
-        telemetry_area = ui.label("Telemetry Pane").classes('w-full h-1/5 bg-gray-100 p-2') # Fixed height for telemetry
+        with ui.column().classes('w-full h-1/5 bg-gray-100 p-2'): # This is the container for telemetry_content
+            telemetry_content('Chassis') # Initial display for telemetry
 
     # Initial content
     switch_pane('chassis')
