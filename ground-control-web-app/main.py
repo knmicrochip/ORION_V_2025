@@ -4,11 +4,13 @@ from app.ui.manipulator_pane import manipulator_pane
 from app.ui.science_pane import science_pane
 from app.ui.menu import menu
 from app.state import ChassisState
-from app.logic.gamepad import setup_gamepad
+from app.logic.gamepad import setup_gamepad_listener
 from app.logic.mqtt_client import MqttClient
 from app.config import setup_logging, MQTT_TOPICS
 
 setup_logging()
+
+app.add_static_files('/static', 'static') # Explicitly add static files directory
 
 # Shared state
 state = ChassisState()
@@ -16,6 +18,9 @@ mqtt_client = MqttClient()
 
 # Global content area reference
 content_area = None
+
+# Global gamepad listener element
+gamepad_listener = None
 
 @ui.refreshable
 def menu_content(active_pane: str):
@@ -57,7 +62,7 @@ def switch_pane(pane_name: str):
 # Main UI Layout
 @ui.page('/')
 def main_page():
-    global content_area
+    global content_area, gamepad_listener
 
     # Left side: Collapsible Menu (direct child of page)
     with ui.left_drawer().classes('bg-gray-200 p-4') as left_drawer:
@@ -77,11 +82,16 @@ def main_page():
         with ui.column().classes('w-full h-1/5 bg-gray-100 p-2'): # This is the container for telemetry_content
             telemetry_content('Chassis') # Initial display for telemetry
 
-    # Initial content
+        # Initial content
     switch_pane('chassis')
 
-# Setup gamepad listener
-setup_gamepad(state, mqtt_client)
+    # Setup gamepad listener (Python side)
+    gamepad_listener = setup_gamepad_listener(state, mqtt_client)
+
+    # Inject Gamepad JS
+    ui.add_head_html(f'<script>console.log("Test script injected!");</script>')
+    ui.add_head_html(f'<script>window.gamepadElementId = "{gamepad_listener.id}";</script>')
+    ui.add_head_html('<script src="/static/gamepad.js"></script>')
 
 import asyncio
 
