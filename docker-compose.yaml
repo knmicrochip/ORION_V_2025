@@ -46,7 +46,8 @@ services:
     environment:
       - MQTT_USERNAME=${MQTT_USERNAME:-user}
       - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
-      - VITE_MQTT_BROKER_URL=mqtt5
+      - MQTT_BROKER_URL=${IP_ADDRESS_OF_HOST_PC_IN_LOCAL_NETWORK:-mqtt5}
+      - MQTT_BROKER_PORT=9001
     user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - mqtt5

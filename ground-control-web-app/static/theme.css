@@ -1,0 +1,65 @@
+/* static/theme.css */
+
+body {
+    transition: background-color 0.3s ease;
+}
+
+body.body--dark {
+    background-color: #121212; /* Dark background */
+    color: #e0e0e0; /* Light text */
+}
+
+/* Dark mode styles for the menu pane (left drawer) */
+body.body--dark .q-drawer {
+    background-color: #1e1e1e !important; /* Darker drawer background */
+    color: #e0e0e0; /* Light text for drawer content */
+}
+
+/* Dark mode styles for the telemetry pane (bottom section) */
+body.body--dark .q-column.h-1\/5.bg-gray-100 {
+    background-color: #1e1e1e !important; /* Darker background for telemetry */
+    color: #e0e0e0; /* Light text for telemetry content */
+}
+
+/* Ensure general column backgrounds adapt */
+body.body--dark .q-column {
+    background-color: #121212; /* Ensure columns also adapt */
+}
+
+/* Ensure labels and other text elements are light in dark mode */
+body.body--dark .q-label,
+body.body--dark .q-item__label {
+    color: #e0e0e0 !important; /* Light text for labels and list item labels */
+}
+
+/* Adjust button colors for dark mode */
+body.body--dark .q-btn {
+    background-color: #333333 !important;
+    color: #e0e0e0 !important;
+}
+
+body.body--dark .q-btn.bg-orange-700 {
+    background-color: #e65100 !important; /* A slightly brighter orange for dark mode */
+    color: #ffffff !important;
+}
+
+/* Ensure text color for buttons is visible */
+.q-btn.text-white {
+    color: #ffffff !important;
+}
+
+/* Joystick styling */
+.nicegui-joystick {
+    background-color: #f0f0f0; /* Default light background */
+    color: #333333; /* Default dark text */
+}
+
+/* Target the joystick's movable circle (nipple) */
+.nicegui-joystick .nipple {
+    background-color: #F5A623 !important; /* Orange circle for both modes */
+}
+
+body.body--dark .nicegui-joystick {
+    background-color: #000000 !important; /* Solid black background in dark mode */
+    color: #e1e1e1 !important; /* Light text in dark mode */
+}

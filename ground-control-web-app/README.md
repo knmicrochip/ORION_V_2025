@@ -2,6 +2,15 @@
 
 This is a web application designed to control a rover, featuring a modular UI, real-time telemetry, and support for various input methods.
 
+The app is meant to be hosted on the onboard computer and accessible in any device in its local network. As the network is
+strickly controlled, the application does not bother with racy conditions and multiple users at the same time
+are allowed.
+
+The app looks like this:
+
+
+![App Screenshot](static/app_ui.jpg | width=250)
+
 ## Features
 
 *   **Modular UI:** Vertical split layout with a collapsible menu, playground, and telemetry panes.
@@ -10,6 +19,7 @@ This is a web application designed to control a rover, featuring a modular UI, r
 *   **Gamepad API Support:** Prioritized input from USB gamepads (Xbox Wireless Controller) and joysticks (Logitech Extreme 3D Pro).
 *   **Responsive Design:** Supports PC screens and mobile devices (landscape orientation enforced).
 *   **Dockerized Deployment:** Application can be built and run as a Docker image.
+
 
 ## Tech Stack
 

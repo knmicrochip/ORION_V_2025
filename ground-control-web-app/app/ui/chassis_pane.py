@@ -37,7 +37,7 @@ def chassis_pane(state: ChassisState, mqtt_client: MqttClient):
                 joystick = ui.joystick(
                     on_move=send_joystick_data,
                     on_end=lambda e: (setattr(state, 'left_stick', [0.0, 0.0]), logger.debug("Joystick reset"), mqtt_client.publish(MQTT_TOPICS['chassis_input'], state.get_payload()))
-                ).classes('bg-gray-100')
+                )
 
             # Action Buttons
             with ui.column().classes('items-center'):
@@ -62,7 +62,7 @@ def chassis_pane(state: ChassisState, mqtt_client: MqttClient):
         # Rotation Joystick
         with ui.column().classes('w-full items-center'):
             ui.label('Rotation').classes('text-lg')
-            _rotation_slider = ui.joystick().classes('bg-gray-100')
+            _rotation_slider = ui.joystick()
 
             # Bind the joystick's value to the state for visual feedback (optional, as joystick is input)
             # _rotation_slider.bind_value(state, 'rotate') # Not directly bindable like slider

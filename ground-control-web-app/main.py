@@ -12,6 +12,8 @@ setup_logging()
 
 app.add_static_files('/static', 'static') # Explicitly add static files directory
 
+ui.add_head_html('<link rel="stylesheet" href="/static/theme.css">')
+
 # Shared state
 state = ChassisState()
 mqtt_client = MqttClient()
@@ -62,7 +64,7 @@ def main_page():
     global content_area
 
     # Left side: Collapsible Menu (direct child of page)
-    with ui.left_drawer().classes('bg-gray-200 p-4') as left_drawer:
+    with ui.left_drawer().classes('p-4') as left_drawer:
         menu_content('chassis') # Initial active pane
 
     # Main content area (fills remaining space)
@@ -76,7 +78,7 @@ def main_page():
             content_area = ui.column().classes('flex-grow h-full') # flex-grow to take remaining width, full height of this row
 
         # Bottom section: Telemetry Pane (full width at the very bottom)
-        with ui.column().classes('w-full h-1/5 bg-gray-100 p-2'): # This is the container for telemetry_content
+        with ui.column().classes('w-full h-1/5 p-2'): # This is the container for telemetry_content
             telemetry_content('Chassis') # Initial display for telemetry
 
         # Initial content
