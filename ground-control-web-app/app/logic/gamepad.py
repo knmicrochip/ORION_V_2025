@@ -5,13 +5,10 @@ from app.config import MQTT_TOPICS
 
 logger = logging.getLogger(__name__)
 
-def process_gamepad_data(gamepad_data_js):
+def process_gamepad_data(gamepad_data_js, state, mqtt_client):
     try:
-        print(f"Python: process_gamepad_data called with data: {gamepad_data_js}")
-        # Import here to avoid circular imports
-        from main import state, mqtt_client
+        logging.debug(f"Python: process_gamepad_data called with data: {gamepad_data_js}")
         
-        print("Python: process_gamepad_data called!")
         gamepad_data = gamepad_data_js
 
         state.gamepad_active = True
@@ -21,7 +18,7 @@ def process_gamepad_data(gamepad_data_js):
             return
 
         gamepad = gamepad_data[0]
-        print(f"Processing gamepad: {gamepad}")
+        logging.debug(f"Processing gamepad: {gamepad}")
 
         state.left_stick = [float(gamepad['axes'][0]), float(gamepad['axes'][1])]
         state.rotate = float(gamepad['axes'][2]) * 100  # Scale to [-100, 100]
@@ -32,7 +29,7 @@ def process_gamepad_data(gamepad_data_js):
 
         logger.debug(f"Gamepad payload: {state.get_payload()}")
         mqtt_client.publish(MQTT_TOPICS['chassis_input'], state.get_payload())
-        print("Python: process_gamepad_data finished successfully!")
+        logging.debug("Python: process_gamepad_data finished successfully!")
     except Exception as e:
         print(f"Error in process_gamepad_data: {e}")
         logger.error(f"Error in process_gamepad_data: {e}")
