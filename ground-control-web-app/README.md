@@ -43,17 +43,34 @@ To get the project up and running locally, follow these steps:
 To run the application simply type:
 
 ```bash
-uv run --dev main.py
+uv run main.py
 ```
 
-Also check docker instructions as it's a preferable way to start the application
+Also check docker instructions as it's a preferable way to start the application.
+
+### Environment Variables
+
+The application uses the following environment variables for configuration:
+
+*   `LOG_LEVEL`: Sets the logging verbosity (e.g., `INFO`, `DEBUG`, `WARNING`, `ERROR`). Default is `INFO`.
+    Example: `LOG_LEVEL=DEBUG uv run main.py`
+
+*   `MQTT_BROKER_URL`: The URL of the MQTT broker. For WebSocket connections, use `ws://` or `wss://` scheme. Default is `ws://mqtt5:9001`.
+    Example: `MQTT_BROKER_URL=ws://localhost:9001 uv run main.py`
+
+*   `MQTT_BROKER_PORT`: The port of the MQTT broker. Default is `1883`.
+    Example: `MQTT_BROKER_PORT=1883 uv run main.py`
+
+*   `MQTT_USERNAME`: Username for MQTT broker authentication. Default is `user`.
+
+*   `MQTT_PASSWORD`: Password for MQTT broker authentication. Default is `user`.
 
 ### Development Mode
 
 To run the application in development mode:
 
 ```bash
-uv run --dev main.py
+uv run main.py
 ```
 
 The application will be accessible at `http://localhost:8080`.

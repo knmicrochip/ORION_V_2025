@@ -48,3 +48,4 @@ def mock_mqtt_client():
 * Log Wisely: Use structured logging for debugging IoT chaos
 * Stay Async: Leverage asyncio for non-blocking MQTT operations
 * Component Isolation: Each UI element should be self-contained
+* Implement only one request at a time. Ask immediately for a human review. Propose next another step

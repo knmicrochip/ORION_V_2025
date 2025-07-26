@@ -97,7 +97,7 @@ Y Axis: max up: -1, max down: 1
 ```
 The event can be subscribed later. The event shall be represented as `"left_stick": [x_value_real, y_value_real]`
 
-3. Under the `ui.joystick` widget, you will place a slider `ui.slider`. The slider reflect
+3. Under the `ui.joystick` widget, you will place another `ui.joystick` known as rotation slider. The slider reflect
 the Z-axis in the joystick such as Logitech Extreme 3D Pro.
 The slider shall use values between -100 and 100. Whenever the user drops the slider button, it is automatically reset to 0, exactly in the middle of the slider. The values shall map
 to `axes[2]` in Gamepad API, which corresponds to `rotate` field in the 
@@ -179,10 +179,14 @@ Display a label in the playground pane: "Science functionality is not implemente
 
 # MQTT configuration
 
-Broker address: ws://mqtt5:9001
-Protocol version: 5
-Automatic reconnection attempts: yet, at intervals of 5 seconds
-Client-id: ground-control-web-app-${timestamp}
-User: user
-Password: user
-Serialization format: JSON
+Apply the following MQTT configs:
+* Broker address: ws://mqtt5:9001
+* Protocol version: 5
+* Automatic reconnection attempts: yet, at intervals of 5 seconds
+* Client-id: ground-control-web-app-${timestamp}
+* User: user
+* Password: user
+* Serialization format: JSON
+
+The application shall be accessible to any device in a local network. The broker
+address shall be therefore configurable
