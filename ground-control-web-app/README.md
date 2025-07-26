@@ -13,10 +13,13 @@ This is a web application designed to control a rover, featuring a modular UI, r
 
 ## Tech Stack
 
-*   [SvelteKit](https://kit.svelte.dev/): Web framework
-*   [Tailwind CSS](https://tailwindcss.com/): Utility-first CSS framework
+*   [Python3](https://www.python.org/) - main programming language
+*   [UV python package manager](https://docs.astral.sh/uv/): modern package manager that turns
+package management hell into pleasure
+*   [NiceGUI](https://github.com/nicegui/nicegui): Modern and easy to use Web Framework for Python
+    * With some TypeScript patches to handle extra things such as Gamepad API
 *   [Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API): For USB controller input
-*   [MQTT.js](https://mqttjs.com/): MQTT client for browser and Node.js
+*   [Python MQTT Paho library](https://pypi.org/project/paho-mqtt/): MQTT5 library with WebSocket support
 *   [Docker](https://www.docker.com/): Containerization platform
 
 ## Setup
@@ -31,25 +34,26 @@ To get the project up and running locally, follow these steps:
 
 2.  **Install dependencies:**
     ```bash
-    npm install
+    curl -LsSf https://astral.sh/uv/install.sh | sh
     ```
 
-3.  **Download Icons (Manual Step):**
-    The application uses custom SVG icons for the menu. Please download the following icons and place them in the `static/icons/` directory:
-    *   Chassis: [https://uxwing.com/wp-content/themes/uxwing/download/transportation-automotive/car-tire-wheel-icon.png](https://uxwing.com/wp-content/themes/uxwing/download/transportation-automotive/car-tire-wheel-icon.png) (Rename to `chassis.svg`)
-    *   Manipulator: [https://uxwing.com/wp-content/themes/uxwing/download/business-professional-services/mechanical-arm-icon.png](https://uxwing.com/wp-content/themes/uxwing/download/business-professional-services/mechanical-arm-icon.png) (Rename to `manipulator.svg`)
-    *   Science: [https://uxwing.com/wp-content/themes/uxwing/download/medical-science-lab/flask-icon.png](https://uxwing.com/wp-content/themes/uxwing/download/medical-science-lab/flask-icon.png) (Rename to `science.svg`)
-
-    *Note: Ensure the downloaded files are converted to SVG format if they are PNGs, and named correctly.* For example, you can use an online converter or a graphics editor.
 
 ## Running the Application
+
+To run the application simply type:
+
+```bash
+uv run --dev main.py
+```
+
+Also check docker instructions as it's a preferable way to start the application
 
 ### Development Mode
 
 To run the application in development mode:
 
 ```bash
-npm run dev
+uv run --dev main.py
 ```
 
 The application will be accessible at `http://localhost:8080`.
@@ -75,15 +79,3 @@ To build and run the application using Docker:
 *   **Menu:** Use the buttons on the left-hand side (Chassis, Manipulator, Science) to switch between different control modes.
 *   **Chassis Controller:** When in Chassis mode, use the draggable knob to control movement. The rotation buttons and Xbox-style buttons (X, Y, A, B) provide additional controls.
 *   **Telemetry Pane:** The bottom right pane displays real-time telemetry data when in Chassis mode.
-
-## Color Palette
-
-The application uses a custom color palette:
-*   Orange: `#FFA500`
-*   Black: `#000000`
-*   Gray: `#808080`
-*   White: `#FFFFFF`
-
-## Theme
-
-This project integrates components and styling from the Crypgo theme. The `tailwind.config.js` has been updated to include its extended theme properties.

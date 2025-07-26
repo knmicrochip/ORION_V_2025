@@ -1,0 +1,10 @@
+[project]
+name = "ground-control-web-app"
+version = "0.1.0"
+description = "A web application that controls a Mars Rover using web widgets and (optionally) USB controllers with MQTT."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "nicegui>=2.21.1",
+    "paho-mqtt>=2.1.0",
+]
