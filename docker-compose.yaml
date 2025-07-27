@@ -1,4 +1,3 @@
-version: "3.7"
 services:
   # mqtt5 eclipse-mosquitto
   mqtt5:
@@ -25,14 +24,15 @@ services:
   uart-mqtt-gateway:
     build: ./uart-mqtt-gateway
     container_name: uart-mqtt-gateway
+    user: "root:root"   # A bit dangerous, but needed for serial port access for now
     privileged: true
+    restart: unless-stopped
     volumes:
       - /dev:/dev
     environment:
       - MQTT_USERNAME=${MQTT_USERNAME:-user}
       - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
       - UART_MQTT_GATEWAY_MQTT_BROKER_URL=mqtt5
-    user: "${UID:-1000}:${GID:-1000}"
     depends_on:
       - mqtt5
     ports:
@@ -49,6 +49,7 @@ services:
       - MQTT_BROKER_URL=${IP_ADDRESS_OF_HOST_PC_IN_LOCAL_NETWORK:-mqtt5}
       - MQTT_BROKER_PORT=9001
     user: "${UID:-1000}:${GID:-1000}"
+    restart: unless-stopped
     depends_on:
       - mqtt5
     ports:

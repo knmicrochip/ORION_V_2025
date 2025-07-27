@@ -42,13 +42,14 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
                             .anyMatch(prefix -> port.getSystemPortPath().startsWith(prefix))
         )
         .collect(Collectors.toList());
-        
+
         // Add new devices
         for (SerialPort port : availablePorts) {
             if (!managedDevices.containsKey(port.getSystemPortName())) {
                     DeviceHandler handler = new DeviceHandler(port, properties, mqttService);
                     handler.start();
                     String eventType = handler.getEventType().join();
+                    log.info("Started handling device: {} with event type: {}", port.getSystemPortName(), eventType);
                     managedDevices.put(port.getSystemPortName(), handler);
                 }
         }

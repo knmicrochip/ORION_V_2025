@@ -29,8 +29,7 @@ void loop() {
 
     auto feedback = runner.generateFeedback();
     serializeJson(feedback, Serial);
-    Serial.println();
-    Serial.println();
+    Serial.print("\n\n");                       // globally agreed delimiter for UART messages
 
     json.clear();
 }
