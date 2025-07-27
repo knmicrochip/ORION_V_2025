@@ -89,6 +89,7 @@ Telemetry data helps operators monitor chassis status and locate the rover when 
 ```
 {
  "eventType": "chassis",        // chassis telemetry unique firmware identifier
+ "mode": "(pwm|cfl|ros)",    // current operation mode, either PWM, CFL or ROS
  "payload": {
     "fl_angV": "<<double>>",    // front-left wheel angular velocity in rad/s
     "fr_angV": "<<double>>",    // front-right wheel angular velocity in rad/s
@@ -100,8 +101,7 @@ Telemetry data helps operators monitor chassis status and locate the rover when 
     "rr_pwm": "<<int16>>",      // rear-right wheel PWM in range [-255, 255]
     "heading": "<<double>>,     // filtered and processed IMU heading in degrees,
     "linearV": "<<double>>",    // optical-flow sensor linear velocity in m/s
-    "angularV": "<<double>>",   // optical-flow sensor angular velocity in rad/s
-    "mode": "(pwm|cfl|ros)",    // current operation mode, either PWM, CFL or ROS
+    "angularV": "<<double>>"    // optical-flow sensor angular velocity in rad/s
  }
 }
 ```

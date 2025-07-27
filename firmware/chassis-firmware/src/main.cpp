@@ -11,10 +11,7 @@ RosOperationalMode OperationalModeRunner::rosMode;
 OperationalModeRunner runner;
 StaticJsonDocument<256> json;
 
-OpMode modeParser(const char* mode);
-
 void setup() {
-    runner.selectMode(OpMode::PWM); 
     Serial.begin(115200);
     while(!Serial);
 }
@@ -26,7 +23,7 @@ void loop() {
     auto error = deserializeJson(json, Serial);
     if (error == DeserializationError::Ok) {
       const char *mode = json["mode"];
-      runner.selectMode(modeParser(mode));
+      runner.selectMode(mode);
       runner.parse(json);
     }
 
@@ -36,15 +33,4 @@ void loop() {
     Serial.println();
 
     json.clear();
-}
-
-OpMode modeParser(const char* mode) {
-    if (strcmp(mode, "PWM") == 0) {
-        return OpMode::PWM;
-    } else if (strcmp(mode, "CFL") == 0) {
-        return OpMode::CFL;
-    } else if (strcmp(mode, "ROS") == 0) {
-        return OpMode::ROS;
-    }
-    return OpMode::PWM; // default mode
 }

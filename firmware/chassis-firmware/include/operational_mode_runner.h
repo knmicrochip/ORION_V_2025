@@ -1,14 +1,9 @@
 #pragma once
+#include <string.h>
 #include "crtp_operational_mode.h"
 #include "pwm_operational_mode.h"
 #include "cfl_operational_mode.h"
 #include "ros_operational_mode.h"
-
-enum class OpMode {
-    PWM,
-    CFL,
-    ROS
-};
 
 class OperationalModeRunner {
     static PwmOperationalMode pwmMode;
@@ -21,31 +16,33 @@ class OperationalModeRunner {
     StaticJsonDocument<CAPACITY> (*feedbackGenerator)();
 
 public:
-    OperationalModeRunner() : executor(nullptr), processor(nullptr), feedbackGenerator(nullptr) {}
+    OperationalModeRunner() : executor(nullptr), processor(nullptr), feedbackGenerator(nullptr) {
+        selectMode("pwm");
+    }
 
-    void selectMode(OpMode mode) {
-        switch (mode) {
-            case OpMode::PWM:
-                executor = [] { pwmMode.execute(); };
-                processor = [](const StaticJsonDocument<CAPACITY>& doc) {
-                    pwmMode.process(doc);
-                };
-                feedbackGenerator = []() { return pwmMode.feedback(); };
-                break;
-            case OpMode::CFL:
-                executor = [] { cflMode.execute(); };
-                processor = [](const StaticJsonDocument<CAPACITY>& doc) {
-                    cflMode.process(doc);
-                };
-                feedbackGenerator = []() { return cflMode.feedback(); };
-                break;
-            case OpMode::ROS:
-                executor = [] { rosMode.execute(); };
-                processor = [](const StaticJsonDocument<CAPACITY>& doc) {
-                    rosMode.process(doc);
-                };
-                feedbackGenerator = []() { return rosMode.feedback(); };
-                break;
+    void selectMode(const char* mode) {
+        if (mode == nullptr) {
+            return;
+        }
+
+        if (strcmp(mode, "pwm") == 0 || strcmp(mode, "PWM") == 0) {
+            executor = [] { pwmMode.execute(); };
+            processor = [](const StaticJsonDocument<CAPACITY>& doc) {
+                pwmMode.process(doc);
+            };
+            feedbackGenerator = []() { return pwmMode.feedback(); };
+        } else if (strcmp(mode, "cfl") == 0 || strcmp(mode, "CFL") == 0) {
+            executor = [] { cflMode.execute(); };
+            processor = [](const StaticJsonDocument<CAPACITY>& doc) {
+                cflMode.process(doc);
+            };
+            feedbackGenerator = []() { return cflMode.feedback(); };
+        } else if (strcmp(mode, "ros") == 0 || strcmp(mode, "ROS") == 0) {
+            executor = [] { rosMode.execute(); };
+            processor = [](const StaticJsonDocument<CAPACITY>& doc) {
+                rosMode.process(doc);
+            };
+            feedbackGenerator = []() { return rosMode.feedback(); };
         }
     }
 
