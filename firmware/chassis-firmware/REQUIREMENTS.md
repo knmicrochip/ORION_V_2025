@@ -9,7 +9,7 @@ The application leverages the following software technology stack:
 * **[C++17](https://en.cppreference.com/w/cpp/language/)**: Primary programming language that provides classes and static patterns such as [CRTP](https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern)
 * **[PlatformIO](https://github.com/platformio/platformio)**: Embedded development plugin for VSCode
 * **[Arduino Framework](https://www.arduino.cc/en/main)**: Embedded platform providing hardware abstraction for rapid development
-* **[ArduinoJson](https://github.com/bblanchon/ArduinoJson)**: JSON parsing and serialization library for Arduino
+* **[ArduinoJson v6](https://arduinojson.org/v6/)**: JSON parsing and serialization library for Arduino. Version 6 is used for its `StaticJsonDocument` support.
 * **[Arduino PID Library](https://github.com/br3ttb/Arduino-PID-Library)**: PID controller implementation
 
 ## Hardware Stack
