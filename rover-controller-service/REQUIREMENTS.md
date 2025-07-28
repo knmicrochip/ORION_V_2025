@@ -123,9 +123,9 @@ Template (follow *integration requirements* sections below for more details):
 
 | field | type | value range | description |
 | --- | --- | --- | --- |
-| payload.stick[0] | double | [-1.0, 1.0] | Turn [left, right]. Value '-1' sets maximum value to turn right, '0' - stop turning, '1' - maximum value to turn left |
-| payload.stick[1] | double | [-1.0, 1.0] | Turn [forward, backward]. Value '-1' sets maximum value to drive forward, '0' - stop completely, '1' - maximum value to drive backward |
-| payload.rotate | double | [-1.0, 1.0] | Turn in-place [left, right]. Value '-1' sets the maximum value to turn left, '0' - stop turning, '1' - maximum value to turn right |
+| payload.stick[0] | double | [-1.0, 1.0] | Turn [left, right]. Value '-1' sets maximum value to turn right, '1' - maximum value to turn left |
+| payload.stick[1] | double | [-1.0, 1.0] | Turn [forward, backward]. Value '-1' sets maximum value to drive forward, '1' - maximum value to drive backward |
+| payload.rotate | double | [-1.0, 1.0] | Turn in-place [left, right]. Value '-1' sets the maximum value to turn left, '1' - maximum value to turn right |
 | payload.button_(x\|y\|a\|b) | boolean | true|false | Not implemented yet | 
 
 #### Outbound payloads
@@ -153,22 +153,32 @@ including slip compensation and terrain adaptation
 
 #### Chassis operational mode: PWM Mode
 
+
 * The application shall map the inbound payload to the outbound payload by applying the
 control principles formed in the table below:
 
-| Input X | Input Y | Left PWM | Right PWM | Behavior |
+    * The joystick X,Y-axis commands shall be translated to the following values:
+
+| payload.stick[0] | payload.stick[1] | Left PWM | Right PWM | Behavior |
 | :-- | :-- | :-- | :-- | :-- |
 | 0 | 1 | 255 | 255 | Full speed forward |
 | 0 | -1 | -255 | -255 | Full speed backward |
-| -1 | 0 | -255 | 255 | In-place left rotation |
-| 1 | 0 | 255 | -255 | In-place right rotation |
 | 0 | 0 | 0 | 0 | No movement |
-| -1 | 0 | 0 | 0 | No movement |
-| 0 | -1 | 0 | 0 | No movement |
 | -0.3 | 0.7 | 101 | 255 | Forward with gentle left curve |
 | 0.3 | 0.7 | 255 | 101 | Forward with gentle right curve |
 | -0.7 | 0.7 | 0 | 255 | Sharp left turn (left wheels stopped) |
 | 0.7 | 0.7 | 255 | 0 | Sharp right turn (right wheels stopped) |
+
+* The application shall prioritize `payload.stick[]` input over payload.rotate:
+    * All `abs(payload.stick[])` values must be lower than 0.1 and `abs(payload.rotate)` must
+    greater than 0.25 to activate in-place robot rotation
+    * The Z-axis joystick shall be translated to the in-place robot rotation:
+
+| payload.rotate | Left PWM | Right PWM | Behavior |
+| :-- | :-- | :-- | :-- |
+| -1 | -255 | 255 | In-place left rotation |
+|1 | 255 | -255 | In-place right rotation |
+
 
 ##### PWM Mode: outbound payload
 ```
