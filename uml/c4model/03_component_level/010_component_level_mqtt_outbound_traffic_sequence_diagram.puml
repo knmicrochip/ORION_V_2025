@@ -1,0 +1,32 @@
+@startuml MQTT_Message_Flow
+header [C4 Component Level] MQTT publish/subscribe message flow from the ""rover-controller-service"" perspective\n
+
+title ""uart-mqtt-gateway"" to ""ground-control-web-app"" outbound traffic
+
+participant "://uart-mqtt-gateway//[1]" as downstream_svc
+box #e4a84f
+    queue "://mqtt-broker//[1]" as mqtt_broker
+    participant "://rover-controller-service//[1]" as rover_svc
+end box
+participant "://ground-controll-web-app//[1]" as upstream_svc
+
+autonumber 1.1
+
+== Direct telemetry updates ==
+downstream_svc ->o mqtt_broker: <<MQTT>> pub(""downstream.outbound"")
+mqtt_broker o-> upstream_svc: <<MQTT>> sub(""downstream.outbound"")
+...
+
+== Process telemetry and publish upstream ==
+downstream_svc ->o mqtt_broker: <<MQTT>> pub(""downstream.outbound"")
+mqtt_broker o-> rover_svc--++: <<MQTT>> sub(""downstream.outbound"")
+rover_svc -> upstream_svc--: <<MQTT>> pub(""upstream.inbound"")
+...
+
+legend
+pub() - publishes an event to a topic
+sub() - describes communication from MQTT broker to a subscriber, carrying an event,
+\tthe receiver of the event is the subscriber
+end legend
+
+@enduml

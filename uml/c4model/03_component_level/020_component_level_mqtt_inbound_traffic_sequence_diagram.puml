@@ -1,0 +1,39 @@
+@startuml MQTT_Message_Flow
+header [C4 Component Level] MQTT publish/subscribe message flow from the ""rover-controller-service"" perspective\n
+title ""uart-mqtt-gateway"" inbound traffic
+
+participant "://uart-mqtt-gateway//[1]" as downstream_svc
+box #e4a84f
+    participant "://rover-controller-service//[1]" as rover_svc
+    queue "://mqtt-broker//[1]" as mqtt_broker
+end box
+participant "://ground-controll-web-app//[1]" as upstream_svc
+
+autonumber 2.1
+
+
+== Receive commands and publish downstream ==
+upstream_svc ->o mqtt_broker: <<MQTT>> pub(""upstream.inbound"")
+mqtt_broker o-> rover_svc++: <<MQTT>> sub(""upstream.inbound"")
+rover_svc -> downstream_svc--: <<MQTT>> pub(""downstream.inbound"")
+...
+
+== Receive commands and telemetry updates, process and publish downstream ==
+par Caching telemetry to implement closed feedback loop
+    downstream_svc ->o mqtt_broker: <<MQTT>> pub(""downstream.outbound"")
+    mqtt_broker o-> rover_svc++: <<MQTT>> sub(""downstream.outbound"")
+    rover_svc -> rover_svc--: Cache telemetry updates
+
+else Process inbound commands, compute new commands based on telemetry, and publish downstream
+    upstream_svc -> mqtt_broker++: <<MQTT>> pub(""upstream.inbound"")
+    mqtt_broker -> rover_svc--++: <<MQTT>> sub(""upstream.inbound"")
+    rover_svc -> rover_svc++--: Apply cached telemetry,\n\tProcess telemetry as closed \n\tfeedback loop
+    rover_svc -> downstream_svc--: <<MQTT>> pub(""downstream.inbound"")
+end par
+
+legend
+pub() - publishes an event to a topic
+sub() - describes communication from MQTT broker to a subscriber, carrying an event,
+\tthe receiver of the event is the subscriber
+end legend
+@enduml

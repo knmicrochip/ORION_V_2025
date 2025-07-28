@@ -1,0 +1,24 @@
+spring:
+    application:
+        name: rover-controller-service
+
+logging:
+  level:
+    root: INFO
+    '[pl.orion]': DEBUG
+
+server:
+    port: 8880
+
+
+mqtt:
+    client-id: uart-mqtt-gateway
+    broker:
+    url: localhost
+    port: 1883
+    username: ${MQTT_USERNAME}
+    password: ${MQTT_PASSWORD}
+    connection:
+    timeout.ms: 5000
+    keepalive.ms: 60000
+    reconnect.delay.ms: 5000

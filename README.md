@@ -31,3 +31,27 @@ work in unison to deliver the full robotic experience, reliably.
 This is a zoomed in view into the system level software design.
 
 ![Container level software component diagram](uml/c4model/02_container_level/010_container_rover_software_component_diagram.svg)
+
+## [C4] Component level
+
+### MQTT topics roadmap
+The following diagrams illustrate the interaction between components from the perspective
+of a hardware device (in this case, the `uart-mqtt-gateway`). Outbound traffic consists
+of messages the microcontroller publishes to MQTT, while inbound traffic is what it receives.
+
+<table>
+    <tr>
+        <th> System outbound traffic </th>
+        <th> System inbound traffic </th>
+    </tr>
+    <tr>
+        <td>
+
+![Component Level Outbound traffic model](uml/c4model/03_component_level/010_component_level_mqtt_outbound_traffic_sequence_diagram.svg)
+        </td>
+        <td>
+
+![Component Level inbound traffic model](uml/c4model/03_component_level/020_component_level_mqtt_inbound_traffic_sequence_diagram.svg)
+        </td>
+    </tr>
+</table>

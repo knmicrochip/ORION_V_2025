@@ -62,16 +62,20 @@ Legend (mandatory fields):
 
 ### `uart-mqtt-mapping.yml`
 ```
-uuart-mqtt-gateway:
+uart-mqtt-gateway:
   error-topic: orion/topic/error
 
   mqtt:
-      broker-url: localhost
-      broker-port: 1883
       client-id: uart-mqtt-gateway
-      connection-timeout-s: 5
-      keep-alive-interval-s: 60
-      reconnect-delay-ms: 5000
+      broker:
+        url: localhost
+        port: 1883
+        username: ${MQTT_USERNAME}
+        password: ${MQTT_PASSWORD}
+      connection:
+        timeout.ms: 5000
+        keepalive.ms: 60000
+        reconnect.delay.ms: 5000
 
   serial:
       scan-interval-ms: 1000
