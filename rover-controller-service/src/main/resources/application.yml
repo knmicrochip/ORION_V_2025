@@ -10,15 +10,22 @@ logging:
 server:
     port: 8880
 
-
 mqtt:
-    client-id: uart-mqtt-gateway
+    client-id: rover-controller-service
     broker:
-    url: localhost
-    port: 1883
-    username: ${MQTT_USERNAME}
-    password: ${MQTT_PASSWORD}
+        url: localhost
+        port: 1883
+        username: ${MQTT_USERNAME}
+        password: ${MQTT_PASSWORD}
     connection:
-    timeout.ms: 5000
-    keepalive.ms: 60000
-    reconnect.delay.ms: 5000
+        timeout.ms: 5000
+        keepalive.ms: 60000
+        reconnect.delay.ms: 5000
+
+chassis:
+    eventType: chassis
+    downstream:
+        inbound: orion/topic/chassis/inbound
+        outbound: orion/topic/chassis/outbound
+    upstream:
+        inbound: orion/topic/chassis/controller/inbound

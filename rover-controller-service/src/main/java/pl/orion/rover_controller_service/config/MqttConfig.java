@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 
 @Configuration
 @ConfigurationProperties(prefix = "mqtt")
@@ -38,7 +39,7 @@ public class MqttConfig {
         private long connectionReconnectDelayMs;
 
         @Bean
-        public MqttClient mqttClient() {
+        public Mqtt5AsyncClient mqttClient() {
             return MqttClient.builder()
                 .useMqttVersion5()
                 .automaticReconnect()
