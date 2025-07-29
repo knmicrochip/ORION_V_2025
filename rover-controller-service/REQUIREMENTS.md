@@ -96,8 +96,8 @@ Template (follow *integration requirements* sections below for more details):
 ## Chassis integration requirements
 
 
-* The hardware chassis shall be equipped with 4 fixed wheels, each paired on the same axle.
-* The hardware chassis shall support only [differential drive](https://en.wikipedia.org/wiki/Differential_drive) as a way to locomote.
+* The hardware chassis shall be equipped with 4 fixed wheels, each pair of wheels being installed on the same axle.
+* The hardware chassis shall support only [differential drive controller](https://en.wikipedia.org/wiki/Differential_wheeled_robot) as a way to locomote.
 * The chassis must be equipped with encoders, to read angular velocity of each wheel.
 
 ### Payloads
