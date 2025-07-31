@@ -6,15 +6,18 @@ This document outlines all requirements that this firmware is designed to meet.
 
 The application leverages the following software technology stack:
 
-* **[C++17](https://en.cppreference.com/w/cpp/language/)**: Primary programming language that provides classes and static patterns such as [CRTP](https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern)
-* **[PlatformIO](https://github.com/platformio/platformio)**: Embedded development plugin for VSCode
-* **[Arduino Framework](https://www.arduino.cc/en/main)**: Embedded platform providing hardware abstraction for rapid development
-* **[ArduinoJson v6](https://arduinojson.org/v6/)**: JSON parsing and serialization library for Arduino. Version 6 is used for its `StaticJsonDocument` support.
-* **[Arduino PID Library](https://github.com/br3ttb/Arduino-PID-Library)**: PID controller implementation
+* **[Arduino IDE](https://www.arduino.cc/en/software/)**: Integrated development enviroment for Arduino hardware.
+* **[Arduino Framework](https://www.arduino.cc/en/main)**: Embedded platform providing hardware abstraction for rapid development.
+* **[ArduinoJson v6](https://arduinojson.org/v6/)**: JSON parsing and serialization library for Arduino. Version 6 is used for not being broken.
+* **[Stepper](https://docs.arduino.cc/libraries/stepper/)**: Library for controlling stepper motors.
+* **[twi](https://github.com/arduino/ArduinoCore-avr/blob/master/libraries/Wire/src/utility/twi.h)**: Low level twin wire library for Arduino ARM boards. Used to bypass broken i2c repeat start implementation.
+* **[Wire](https://docs.arduino.cc/language-reference/en/functions/communication/wire/)**: Arduino i2c library.
+* **[SparkFun AS7265X Arduino Library](https://github.com/sparkfun/SparkFun_AS7265X_Arduino_Library)**: An Arduino library to control the AS7265X Spectral Sensors.
+* **[HX711](https://github.com/RobTillaart/HX711)**: Arduino library for HX711 24 bit ADC used for load cells and scales.
 
 ## Hardware Stack
 
-* **[Arduino Mega2560](https://store.arduino.cc/products/arduino-mega-2560-rev3)**: Development board featuring an ATmega2560 microcontroller
+* **[Arduino Due](https://docs.arduino.cc/hardware/due/)**: Development board featuring an Atmel SAM3X8E ARM Cortex-M3 CPU.
 * **UART-to-USB Converter**: Built-in Arduino functionality
 * **Serial Communication**: Full-duplex with the following configuration:
   - Baud rate: 115,200
@@ -31,10 +34,10 @@ On Linux systems, the serial device is accessible at:
 The application comprises the following core components:
 
 * **Message Processing**: Receive and transmit JSON payloads
-* **Command Parsing**: Parse incoming commands and validate syntax
-* **Control Algorithm Management**: Switch between and apply control algorithms using CRTP strategy pattern
-* **Telemetry System**: Collect and transmit status data at regular, predictable intervals
-
+* **Command Parsing**: Parse incoming commands
+* **Sample aquisition control**: Control drill, elevator and conveyor belt motors according to received commands
+* **
+* **Telemetry System**: Collect and transmit status data
 ### Communication Protocol
 
 All payloads are terminated with two newline characters: `\n\n`. When the serial implementation detects this delimiter, it parses the entire received buffer as a single JSON message.
@@ -83,7 +86,7 @@ Telemetry data helps operators monitor chassis status and locate the rover when 
 
 > **Note**: Messages must be formatted in compact mode without extra whitespace to optimize transmission
 > speed across all services, including the MQTT integration layer.
-
+* **[PlatformIO](https://github.com/platformio/platformio)**: Embedded development plugin for VSCode
 **Telemetry Payload Structure:**
 
 ```
@@ -152,29 +155,6 @@ Each wheel remains individually controlled by higher-level applications such as 
     "fr": ""<<double>>",    // front-right wheel angular velocity in rad/s
     "rl": ""<<double>>",    // rear-left wheel angular velocity in rad/s
     "rr": ""<<double>>"     // rear-right wheel angular velocity in rad/s
- }
-}
-```
-
-### **ROS** operational mode
-In **ROS mode**, the rover chassis is controlled using linear and angular velocity vectors that 
-correspond to the ROS [Twist](http://docs.ros.org/en/api/geometry_msgs/html/msg/Twist.html) message format. 
-This mode is designed for integration with ROS middleware deployed alongside the MQTT-based stack.
-
-The ROS middleware provides autonomous navigation capabilities by combining multiple systems including cameras, 
-sensors, dead reckoning algorithms, [SLAM](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping), 
-and path planning frameworks like [Nav2](https://github.com/ros2/nav2).
-
-This interface enables seamless integration with off-the-shelf ROS components for complete platform autonomy.
-
-**ROS Command Payload:**
-```
-{
- "eventType": "chassis",    // chassis telemetry unique firmware identifier
- "mode": "ROS",             // operational mode: ROS
- "payload": {
-    "linear": [<<double>>, <<double>>, <<double>>],     //Vector3 (x, y, z) expressed in m/s
-    "angular": [<<double>>, <<double>>, <<double>>]     //Vector3 (x, y, z) expressed in rad/s
  }
 }
 ```
