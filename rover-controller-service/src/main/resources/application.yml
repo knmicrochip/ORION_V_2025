@@ -9,11 +9,12 @@ logging:
 
 server:
     port: 8880
+    shutdown: graceful
 
 mqtt:
-    client-id: rover-controller-service
+    clientId: rover-controller-service
     broker:
-        url: localhost
+        url: ${MQTT_BROKER_URL}
         port: 1883
         username: ${MQTT_USERNAME}
         password: ${MQTT_PASSWORD}

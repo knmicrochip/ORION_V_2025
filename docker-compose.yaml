@@ -40,6 +40,24 @@ services:
     networks:
       - orion-network
 
+  # rover-controller-service service
+  rover-controller-service:
+    build: ./rover-controller-service
+    container_name: rover-controller-service
+    restart: unless-stopped
+    volumes:
+      - /dev:/dev
+    environment:
+      - MQTT_USERNAME=${MQTT_USERNAME:-user}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
+      - MQTT_BROKER_URL=mqtt5
+    depends_on:
+      - mqtt5
+    ports:
+      - "8880:8880"
+    networks:
+      - orion-network
+
   ground-control-web-app:
     build: ./ground-control-web-app
     container_name: ground-control-web-app

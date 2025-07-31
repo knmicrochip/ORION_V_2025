@@ -5,19 +5,19 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+
 import pl.orion.rover_controller_service.chassis.model.ChassisInboundPayload;
 import pl.orion.rover_controller_service.chassis.service.DriveModeManager;
+import pl.orion.rover_controller_service.config.MqttClient;
 
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
-@Component
+@Controller
 public class ChassisMqttController {
     private static final Logger logger = LoggerFactory.getLogger(ChassisMqttController.class);
     
@@ -31,10 +31,9 @@ public class ChassisMqttController {
     @Value("${chassis.downstream.inbound:orion/topic/chassis/inbound}")
     private String chassisOutboundTopic;
     
-    @Autowired
-    public ChassisMqttController(Mqtt5AsyncClient mqttClient, DriveModeManager driveModeManager, 
+    public ChassisMqttController(MqttClient mqttClient, DriveModeManager driveModeManager, 
                                 @Qualifier("chassisObjectMapper") ObjectMapper objectMapper) {
-        this.mqttClient = mqttClient;
+        this.mqttClient = mqttClient.getMqttClient();
         this.driveModeManager = driveModeManager;
         this.objectMapper = objectMapper;
     }
@@ -54,6 +53,7 @@ public class ChassisMqttController {
                     logger.info("Successfully subscribed to chassis inbound topic: {}", chassisInboundTopic);
                 }
             });
+        logger.info("Subscribed", chassisInboundTopic);
     }
     
     @PreDestroy
@@ -75,7 +75,7 @@ public class ChassisMqttController {
     private void handleInboundMessage(Mqtt5Publish publish) {
         try {
             String payload = new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
-            logger.debug("Received message on topic {}: {}", publish.getTopic(), payload);
+            logger.trace("Received message on topic {}: {}", publish.getTopic(), payload);
             
             // Parse the inbound payload
             ChassisInboundPayload chassisPayload = objectMapper.readValue(payload, ChassisInboundPayload.class);
@@ -94,7 +94,7 @@ public class ChassisMqttController {
     }
     
     private void publishOutboundMessage(String payload) {
-        logger.debug("Publishing outbound message to topic {}: {}", chassisOutboundTopic, payload);
+        logger.trace("Publishing outbound message to topic {}: {}", chassisOutboundTopic, payload);
         
         mqttClient.publishWith()
             .topic(chassisOutboundTopic)

@@ -19,6 +19,16 @@
             "projectName": "uart-mqtt-gateway",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-RoverControllerServiceApplication<rover-controller-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "pl.orion.rover_controller_service.RoverControllerServiceApplication",
+            "projectName": "rover-controller-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

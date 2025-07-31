@@ -1,5 +1,7 @@
 package pl.orion.rover_controller_service.chassis.service;
 
+import java.math.BigDecimal;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,12 @@ public class PwmModeStrategy implements DriveModeStrategy {
         boolean useRotate = (Math.abs(stickX) < STICK_THRESHOLD && 
                             Math.abs(stickY) < STICK_THRESHOLD && 
                             Math.abs(rotateZ) > ROTATE_THRESHOLD);
+
+        // Use case for the UI input, in which X,Y are always zero if once decides to use rotation
+        useRotate = useRotate || (
+            BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Math.abs(stickX))) == 0 &&
+            BigDecimal.ZERO.compareTo(BigDecimal.valueOf(Math.abs(stickY))) == 0);
+
         
         short leftPwm, rightPwm;
         

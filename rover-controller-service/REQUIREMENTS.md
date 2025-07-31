@@ -1,18 +1,17 @@
 # Overview
 
 This document specifies a list of requirements for the `rover-controller-service` project.
-The application is meant to link close to real-time event processing to remotely control
-a robotic platform.
+The application is designed to link near real-time event processing with the remote control of a robotic platform.
 
 The platform comprises modules such as chassis, manipulator, science and power.
-`The rover-controller-service` aggregates each hardware module and implements corresponding
+The `rover-controller-service` aggregates each hardware module and implements corresponding
 behavior as described in [Functional requirements section](#functional-requirements).
 
 # Tech stack
 
 * [Java 21](https://docs.oracle.com/en/java/javase/21/): A programming language of choice
 * [Spring Boot](https://spring.io/projects/spring-boot): A comprehensive application framework
-* [Spring Actuator](https://docs.spring.io/spring-boot/docs): This is to assure the service is always alive
+* [Spring Actuator](https://docs.spring.io/spring-boot/docs): Ensures the service remains alive and provides monitoring capabilities.
 * [Hive MQTT Library](https://github.com/hivemq/hivemq-mqtt-client-java): MQTT asynchronous library for Java
 * [SL4J](https://www.slf4j.org/): A logging wrapper for Java
 * [Mockito](https://site.mockito.org/): Mocking framework for unit testing in Java
@@ -41,28 +40,28 @@ mqtt:
         reconnect.delay.ms: 5000
 ```
 * MQTT username and password shall be passed as environment variables
-* The application must expose and endpoint to monitor liveness and readiness of the application
-* Application readiness must be defined as: all beans have been created and MQTT connection
+* The application must expose an endpoint to monitor the liveness and readiness of the application
+* Application readiness must be defined as: all beans have been created and the MQTT connection
 is established
-* Application liveness must be defined as: the application maintains connectivity with MQTT broker
+* Application liveness must be defined as: the application maintains connectivity with the MQTT broker
 * The application shall use `mqtt://` protocol by default
-* Garbage collector shall be tuned for the lowest possible latency
+* The garbage collector shall be tuned for the lowest possible latency
 
 ## Testing
 
 * Every public method in controllers, services shall be tested
-* Every other method but public should be tested, yet it is by case-by-case basis
+* Every method other than public methods should be tested, on a case-by-case basis.
 * Integration testing shall verify both inbound and outbound traffic flows
 * Integration testing shall rely on testcontainers to deploy a mock MQTT server
 * Integration testing shall rely on a custom Java bean to create an `MqttClient` for testing purposes
 
 # Functional requirements
 
-Configuration fields in `rover-controller-service` must be defined as follows:
-* Whenever `downstream.inbound` topic is mentioned, the application shall publish to it
-* Whenever `downstream.outbound` topic is mentioned, the application shall subscribe to it
-* Whenever `upstream.inbound` topic is mentioned, the application shall subscribe to it
-* Whenever `upstream.outbound` topic is mentioned, the application shall publish to it
+Configuration fields for the `rover-controller-service` must be defined as follows:
+* Whenever the `downstream.inbound` topic is mentioned, the application shall publish to it.
+* Whenever the `downstream.outbound` topic is mentioned, the application shall subscribe to it.
+* Whenever the `upstream.inbound` topic is mentioned, the application shall subscribe to it.
+* Whenever the `upstream.outbound` topic is mentioned, the application shall publish to it.
 
 Template (follow *integration requirements* sections below for more details):
 ```
@@ -96,9 +95,9 @@ Template (follow *integration requirements* sections below for more details):
 ## Chassis integration requirements
 
 
-* The hardware chassis shall be equipped with 4 fixed wheels, each pair of wheels being installed on the same axle.
-* The hardware chassis shall support only [differential drive controller](https://en.wikipedia.org/wiki/Differential_wheeled_robot) as a way to locomote.
-* The chassis must be equipped with encoders, to read angular velocity of each wheel.
+* The hardware chassis shall be equipped with 4 fixed wheels, with each pair of wheels installed on the same axle.
+* The hardware chassis shall support only a [differential drive controller](https://en.wikipedia.org/wiki/Differential_wheeled_robot) for locomotion.
+* The chassis must be equipped with encoders to read the angular velocity of each wheel.
 
 ### Payloads
 
@@ -123,31 +122,31 @@ Template (follow *integration requirements* sections below for more details):
 
 | field | type | value range | description |
 | --- | --- | --- | --- |
-| payload.stick[0] | double | [-1.0, 1.0] | Turn [left, right]. Value '-1' sets maximum value to turn right, '1' - maximum value to turn left |
-| payload.stick[1] | double | [-1.0, 1.0] | Turn [forward, backward]. Value '-1' sets maximum value to drive forward, '1' - maximum value to drive backward |
-| payload.rotate | double | [-1.0, 1.0] | Turn in-place [left, right]. Value '-1' sets the maximum value to turn left, '1' - maximum value to turn right |
+| payload.stick[0] | double | [-1.0, 1.0] | Turn [left, right]. A value of '-1' sets the maximum turn to the right, and '1' sets the maximum turn to the left. |
+| payload.stick[1] | double | [-1.0, 1.0] | Drive [forward, backward]. A value of '-1' sets the maximum drive forward, and '1' sets the maximum drive backward. |
+| payload.rotate | double | [-1.0, 1.0] | Turn in-place [left, right]. A value of '-1' sets the maximum turn to the left, and '1' sets the maximum turn to the right. |
 | payload.button_(x\|y\|a\|b) | boolean | true|false | Not implemented yet | 
 
 #### Outbound payloads
 
 * Outbound payloads shall be strictly linked with the [operational modes](#operational-modes)
-the robot is set up with
+configured for the robot.
 
 
 ### Operational modes
 * The application shall three distinct operational modes:
 
     * **PWM Mode**: Receives a command from the upstream, remaps it onto PWM values for each
-wheel and send downstream 
+wheel, and sends it downstream. 
     * **CFL Mode** (Closed Feedback Loop): Receives a command from the upstream, remaps it into 
-angular velocity values for each wheel and sends downstream
+angular velocity values for each wheel, and sends them downstream.
     * **ROS Mode**: Receives a command from the upstream, remaps it into a ROS-compatible 
-[Twist](https://docs.ros.org/en/foxy/api/geometry_msgs/html/msg/Twist.html) message-like 
+[Twist](https://docs.ros.org/en/foxy/api/geometry_msgs/html/msg/Twist.html) messages 
 messages with linear and angular velocity for precise rover control,
 including slip compensation and terrain adaptation
 
 * The application shall support more modes in future
-* Operational modes shall be swappable in realtime, which will be suppoted by 
+* Operational modes shall be swappable in real-time, supported by the 
 [strategy pattern](https://en.wikipedia.org/wiki/Strategy_pattern).
 
 
@@ -155,14 +154,14 @@ including slip compensation and terrain adaptation
 
 
 * The application shall map the inbound payload to the outbound payload by applying the
-control principles formed in the table below:
+control principles outlined in the table below:
 
-    * The joystick X,Y-axis commands shall be translated to the following values:
+    * Joystick X,Y-axis commands shall be translated to the following values:
 
 | payload.stick[0] | payload.stick[1] | Left PWM | Right PWM | Behavior |
 | :-- | :-- | :-- | :-- | :-- |
-| 0 | 1 | 255 | 255 | Full speed forward |
-| 0 | -1 | -255 | -255 | Full speed backward |
+| 0 | -1 | -255 | -255 | Full speed forward |
+| 0 | 1 | 255 | 255 | Full speed backward |
 | 0 | 0 | 0 | 0 | No movement |
 | -0.3 | 0.7 | 101 | 255 | Forward with gentle left curve |
 | 0.3 | 0.7 | 255 | 101 | Forward with gentle right curve |
@@ -170,9 +169,9 @@ control principles formed in the table below:
 | 0.7 | 0.7 | 255 | 0 | Sharp right turn (right wheels stopped) |
 
 * The application shall prioritize `payload.stick[]` input over payload.rotate:
-    * All `abs(payload.stick[])` values must be lower than 0.1 and `abs(payload.rotate)` must
-    greater than 0.25 to activate in-place robot rotation
-    * The Z-axis joystick shall be translated to the in-place robot rotation:
+    * All `abs(payload.stick[])` values must be lower than 0.1, and `abs(payload.rotate)` must be
+    greater than 0.25 to activate in-place robot rotation.
+    * The Z-axis joystick shall be translated to control in-place robot rotation:
 
 | payload.rotate | Left PWM | Right PWM | Behavior |
 | :-- | :-- | :-- | :-- |
@@ -183,7 +182,7 @@ control principles formed in the table below:
 ##### PWM Mode: outbound payload
 ```
 {
- "eventType": "chassis",    // chassis telemetry unique firmware identifier
+ "eventType": "chassis",    // Unique firmware identifier for chassis telemetry
  "mode": "pwm",             // operational mode: PWM
  "payload": {
     "fl": "<<int16>>",      // front-left wheel PWM in range [-255, 255]
@@ -201,13 +200,13 @@ CFL Mode requirements: TBD
 
 ```
 {
- "eventType": "chassis",    // chassis telemetry unique firmware identifier
+ "eventType": "chassis",    // Unique firmware identifier for chassis telemetry
  "mode": "CFL",             // operational mode: CFL
  "payload": {
-    "fl": ""<<double>>",    // front-left wheel angular velocity in rad/s
-    "fr": ""<<double>>",    // front-right wheel angular velocity in rad/s
-    "rl": ""<<double>>",    // rear-left wheel angular velocity in rad/s
-    "rr": ""<<double>>"     // rear-right wheel angular velocity in rad/s
+    "fl": "<<double>>",    // Front-left wheel angular velocity in rad/s
+    "fr": "<<double>>",    // Front-right wheel angular velocity in rad/s
+    "rl": "<<double>>",    // Rear-left wheel angular velocity in rad/s
+    "rr": "<<double>>"     // Rear-right wheel angular velocity in rad/s
  }
 }
 ```
@@ -219,11 +218,11 @@ CFL Mode requirements: TBD
 ##### ROS Mode: Outbound payload
 ```
 {
- "eventType": "chassis",    // chassis telemetry unique firmware identifier
+ "eventType": "chassis",    // Unique firmware identifier for chassis telemetry
  "mode": "ROS",             // operational mode: ROS
  "payload": {
-    "linear": [<<double>>, <<double>>, <<double>>],     //Vector3 (x, y, z) expressed in m/s
-    "angular": [<<double>>, <<double>>, <<double>>]     //Vector3 (x, y, z) expressed in rad/s
+    "linear": [<<double>>, <<double>>, <<double>>],     // Vector3 (x, y, z) expressed in m/s
+    "angular": [<<double>>, <<double>>, <<double>>]     // Vector3 (x, y, z) expressed in rad/s
  }
 }
 ```
@@ -242,7 +241,7 @@ chassis:
 
 ## Manipulator integration requirements
 
-* Manipulator shall use the following MQTT topics configuration for inbound and outbound traffic:
+* The manipulator shall use the following MQTT topic configuration for inbound and outbound traffic:
 
 ```
 manipulator:

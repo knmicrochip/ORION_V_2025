@@ -19,6 +19,6 @@ class ChassisState:
                 "button_y": self.button_y,
                 "button_a": self.button_a,
                 "button_b": self.button_b,
-                "rotate": [self.rotate / 100.0],  # Scaled to [-1, 1]
+                "rotate": [self.rotate]
             }
         }
