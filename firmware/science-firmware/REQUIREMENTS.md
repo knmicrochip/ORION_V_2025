@@ -10,7 +10,7 @@ The application leverages the following software technology stack:
 * **[Arduino Framework](https://www.arduino.cc/en/main)**: Embedded platform providing hardware abstraction for rapid development.
 * **[ArduinoJson v6](https://arduinojson.org/v6/)**: JSON parsing and serialization library for Arduino. Version 6 is used for not being broken.
 * **[Stepper](https://docs.arduino.cc/libraries/stepper/)**: Library for controlling stepper motors.
-* **[twi](https://github.com/arduino/ArduinoCore-avr/blob/master/libraries/Wire/src/utility/twi.h)**: Low level twin wire library for Arduino ARM boards. Used to bypass broken i2c repeat start implementation.
+* **[twi](https://github.com/arduino/ArduinoCore-avr/blob/master/libraries/Wire/src/utility/twi.h)**: Low level twin wire library for Arduino ARM boards. Used to bypass broken i2c repeat start implementation in Wire.
 * **[Wire](https://docs.arduino.cc/language-reference/en/functions/communication/wire/)**: Arduino i2c library.
 * **[SparkFun AS7265X Arduino Library](https://github.com/sparkfun/SparkFun_AS7265X_Arduino_Library)**: An Arduino library to control the AS7265X Spectral Sensors.
 * **[HX711](https://github.com/RobTillaart/HX711)**: Arduino library for HX711 24 bit ADC used for load cells and scales.
@@ -36,7 +36,7 @@ The application comprises the following core components:
 * **Message Processing**: Receive and transmit JSON payloads
 * **Command Parsing**: Parse incoming commands
 * **Sample aquisition control**: Control drill, elevator and conveyor belt motors according to received commands
-* **
+* **Automatic measurement sequence**: Upon receiving a command, conduct an automatic science sequence. Control drum movement, collect data from sensors and transmit it via UART
 * **Telemetry System**: Collect and transmit status data
 ### Communication Protocol
 
@@ -44,21 +44,6 @@ All payloads are terminated with two newline characters: `\n\n`. When the serial
 
 Similarly, all outbound data from the application to the onboard computer must be suffixed with `\n\n`.
 
-## Operational Modes
-
-The application supports three distinct operational modes:
-
-* **PWM Mode**: Accepts direct PWM commands for individual motor control
-* **CFL Mode** (Closed Feedback Loop): Accepts angular velocity commands for individual motors with feedback control
-* **ROS Mode**: Accepts ROS-compatible Twist-like messages with linear and angular velocity for precise rover control,
-including slip compensation and terrain adaptation
-
-Each operational mode is implemented using [CRTP](http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern), providing a compile-time implementation of the [strategy design pattern](https://en.wikipedia.org/wiki/Strategy_pattern).
-
-The operational mode can be switched dynamically using the commands described in the [Inbound Messages](#inbound-messages) section.
-
-To select an operational mode, the application shall rely on function pointers to select
-an algorithm in runtime.
 
 ## JSON Communication Schema
 
