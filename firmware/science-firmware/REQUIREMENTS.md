@@ -111,7 +111,7 @@ Science module commands allow for controlling the drill,conveyor belt and to beg
 
 ```
 {
- "eventType": "science",    // chassis telemetry unique firmware identifier
+ "eventType": "science",    // science telemetry unique firmware identifier
  "payload": {
     "drill": "<<int>>",     // drill PWM in range [-255, 255]
     "elev": "<<int>>",      // elevator PWM in range [-255, 255]
