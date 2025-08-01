@@ -11,9 +11,8 @@ struct sample{
   int number;
   float mass;
   float temp;
-  float rad;
   float lights[18];
-  int gasses[4];
+  float gasses[4];
 };
 
 struct sample sample1;
@@ -121,10 +120,10 @@ void measureGas(struct sample *sample){
   analogWrite(laserOn,255);
   delay(10000);
   analogWrite(laserOn,0);
-  sample->gasses[0] = analogRead(MQ2);
-  sample->gasses[1] = analogRead(MQ4);
-  sample->gasses[2] = analogRead(MQ5);
-  sample->gasses[3] = analogRead(MQ8);
+  sample->gasses[0] = analogRead(MQ2)*0.00538;
+  sample->gasses[1] = analogRead(MQ4)*0.00538;
+  sample->gasses[2] = analogRead(MQ5)*0.00538;
+  sample->gasses[3] = analogRead(MQ8)*0.00538;
   digitalWrite(MQon,LOW);
 }
 
@@ -220,7 +219,6 @@ void sendSampleData(sample *sample){
   }*/
   payload["mass"] = sample->mass;
   payload["temp"] = sample->temp;
-  payload["rad"] = sample->rad;
 
   JsonArray gasses = payload.createNestedArray("gasses");
   for(int i=0;i<4;i++){
@@ -259,9 +257,9 @@ void researchSequence(sample *sample){
 void sendTelemetry(){
   StaticJsonDocument<255> doc;
   doc["eventType"] = "science";
-  doc["mode"] = "pwm";
+  //doc["mode"] = "pwm";
   JsonObject payload = doc.createNestedObject("payload");
-  
+
   payload["FbDrillA"] = float(analogRead(btsFbSwiderA)*0.0274);
   payload["FbDrillB"] = float(analogRead(btsFbSwiderB)*0.0274);
 
@@ -269,7 +267,10 @@ void sendTelemetry(){
   payload["FbElevatorB"] = float(analogRead(btsFbWindaB)*0.0274);
 
   //serializeJsonPretty(doc, Serial);
-  serializeJson(doc, Serial);
+  String output;
+  serializeJson(doc, output);
+  output.concat("\n\n");
+  Serial.print(output);
 }
 
 void setup() {
@@ -370,7 +371,7 @@ void loop() {
     packetBuffer = Serial.readString();
     StaticJsonDocument<255> command;
     deserializeJson(command, packetBuffer);
-    if(command["eventType"] == "science"){
+    if(command["eventType"] == "science" && packetBuffer.substring(packetBuffer.length()-4) == "\n\n"){
       int drillPWM = command["payload"]["drill"];
       drill(drillPWM);
       int elevPWM = command["payload"]["elev"];
@@ -378,7 +379,7 @@ void loop() {
       int conv = command["payload"]["conv"];
       conveyor(conv);
 
-      if(command["payload"]["res_seq"] == "start"){
+      if(command["payload"]["res_seq"] == 1){
         if(currSample < 6){
           drill(0);
           elev(0);
