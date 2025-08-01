@@ -230,7 +230,10 @@ void sendSampleData(sample *sample){
   }
 
   //serializeJsonPretty(doc, Serial);
-  serializeJson(doc, Serial);
+  String output;
+  serializeJson(doc, output);
+  output.concat("\n\n");
+  Serial.print(output);
 }
 
 //scale
