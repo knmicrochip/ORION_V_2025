@@ -62,7 +62,7 @@ with the one defined by [uart-mqtt-gateway](../../uart-mqtt-gateway/README.md#js
 
 ## Outbound JSON schema
 
-The outbound schema defines messages that the microcontroller **sends to the onboard computer** via UART. 
+The outbound schema defines messages that the microcontroller sends to the onboard computer via UART. 
 These messages provide current feedback from bts motor controllers.
 
 > **Note**: Messages must be formatted in compact mode without extra whitespace to optimize transmission
@@ -120,3 +120,4 @@ Science module commands allow for controlling the drill,conveyor belt and to beg
  }
 }
 ```
+**Note**: When research sequence start, drill, elevator and belt are shut down.
