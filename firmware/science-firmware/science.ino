@@ -261,11 +261,12 @@ void sendTelemetry(){
   doc["eventType"] = "science";
   doc["mode"] = "pwm";
   JsonObject payload = doc.createNestedObject("payload");
-  payload["FbDrillA"] = analogRead(btsFbSwiderA);
-  payload["FbDrillB"] = analogRead(btsFbSwiderB);
+  
+  payload["FbDrillA"] = float(analogRead(btsFbSwiderA)*0.0274);
+  payload["FbDrillB"] = float(analogRead(btsFbSwiderB)*0.0274);
 
-  payload["FbElevatorA"] = analogRead(btsFbWindaA);
-  payload["FbElevatorB"] = analogRead(btsFbWindaB);
+  payload["FbElevatorA"] = float(analogRead(btsFbWindaA)*0.0274);
+  payload["FbElevatorB"] = float(analogRead(btsFbWindaB)*0.0274);
 
   //serializeJsonPretty(doc, Serial);
   serializeJson(doc, Serial);
