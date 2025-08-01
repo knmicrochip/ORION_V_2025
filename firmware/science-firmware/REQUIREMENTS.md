@@ -63,83 +63,60 @@ with the one defined by [uart-mqtt-gateway](../../uart-mqtt-gateway/README.md#js
 ## Outbound JSON schema
 
 The outbound schema defines messages that the microcontroller **sends to the onboard computer** via UART. 
-These messages provide essential telemetry including power consumption, wheel angular velocities, 
-dead-reckoning heading, and system status.
-
-Telemetry data helps operators monitor chassis status and locate the rover when other systems 
-(especially cameras) are unavailable.
+These messages provide current feedback from bts motor controllers.
 
 > **Note**: Messages must be formatted in compact mode without extra whitespace to optimize transmission
 > speed across all services, including the MQTT integration layer.
-* **[PlatformIO](https://github.com/platformio/platformio)**: Embedded development plugin for VSCode
 **Telemetry Payload Structure:**
 
 ```
 {
- "eventType": "chassis",        // chassis telemetry unique firmware identifier
- "mode": "(pwm|cfl|ros)",    // current operation mode, either PWM, CFL or ROS
+ "eventType": "science",        // science module telemetry unique firmware identifier
  "payload": {
-    "fl_angV": "<<double>>",    // front-left wheel angular velocity in rad/s
-    "fr_angV": "<<double>>",    // front-right wheel angular velocity in rad/s
-    "rl_angV": "<<double>>",    // rear-left wheel angular velocity in rad/s
-    "rr_angV": "<<double>>",    // rear-right wheel angular velocity in rad/s
-    "fl_pwm": "<<int16>>",      // front-left wheel PWM in range [-255, 255]
-    "fr_pwm": "<<int16>>",      // front-right wheel PWM in range [-255, 255]
-    "rl_pwm": "<<int16>>",      // rear-left wheel PWM in range [-255, 255]
-    "rr_pwm": "<<int16>>",      // rear-right wheel PWM in range [-255, 255]
-    "heading": "<<double>>,     // filtered and processed IMU heading in degrees,
-    "linearV": "<<double>>",    // optical-flow sensor linear velocity in m/s
-    "angularV": "<<double>>"    // optical-flow sensor angular velocity in rad/s
+    "FbDrillA":"<<float>>",     //Drill motor current in direction A in Amps
+    "FbDrillB":"<<float>>",     //Drill motor current in direction B in Amps
+    "FbElevatorA":"<<float>>",  //Elevator motor current in direction A in Amps
+    "FbElevatorB":"<<float>>"   //Elevator motor current in direction B in Amps
  }
 }
 ```
-
+When research sequence is completed, the system sends sample data via uart.
+**Sample Data Payload Structure:**
+```
+{
+ "eventType": "science",        // science module telemetry unique firmware identifier
+ "payload": {
+    "number":"<<int>>",         //individual number of a sample in range [1,6]
+    "mass":"<<float>>",         //sample mass in grams
+    "temp":"<<float>>",         //sample temperature in degrees Celsius
+    "gasses":{
+        "<<float>>",            //MQ2 gas sensor analog output voltage in Volts
+        "<<float>>",            //MQ4 gas sensor analog output voltage in Volts
+        "<<float>>",            //MQ5 gas sensor analog output voltage in Volts
+        "<<float>>"             //MQ8 gas sensor analog output voltage in Volts
+    }
+  "lights": {                   //18 count values for different wavelenght each. List of wavelenghts in nanometers in order: [410,435,460,485,510,535,560,585,610,645,680,705,730,760,810,860,900,940]
+        "<<float>>",            //counts for 410nm wavelenght
+        "<<float>>",            //counts for 435nm wavelenght
+        ...
+        "<<float>>"             //counts for 940nm wavelenght
+  }
+ }
+}
+```
 
 ## Inbound messages
-
-The chassis firmware accepts multiple command payloads based on the [JSON schema](#json-communication-schema).
-
-#### PWM Operational Mode
-
-In **PWM mode**, the rover chassis is controlled by directly applying PWM values to individual wheels. 
-Each wheel is independently controlled by higher-level applications within the system architecture, 
-such as [rover-controller-service](../../rover-controller-service/README.md).
-
-**PWM Command Payload:**
+Science module commands allow for controlling the drill,conveyor belt and to begin the research sequence when the sample is inserted into the drum.
+**Command Payload:**
 
 ```
 {
- "eventType": "chassis",    // chassis telemetry unique firmware identifier
- "mode": "pwm",             // operational mode: PWM
+ "eventType": "science",    // chassis telemetry unique firmware identifier
  "payload": {
-    "fl": "<<int16>>",      // front-left wheel PWM in range [-255, 255]
-    "fr": "<<int16>>",      // front-right wheel PWM in range [-255, 255]
-    "rl": "<<int16>>",      // rear-left wheel PWM in range [-255, 255]
-    "rr": "<<int16>>"       // rear-right wheel PWM in range [-255, 255]
- }
-}
-```
-
-### **CFL** operational mode
-
-In **CFL mode** (Closed Feedback Loop), the rover chassis is controlled by specifying desired 
-angular velocities in `rad/s` for each wheel. The firmware maintains these target velocities 
-using feedback control. This mode provides predictability for scripting applications in uniform 
-terrain and serves as the foundation for closed-loop control that maintains rover heading.
-
-Each wheel remains individually controlled by higher-level applications such as [
-    rover-controller-service](../../rover-controller-service/README.md).
-
-**CFL Command Payload:**
-```
-{
- "eventType": "chassis",    // chassis telemetry unique firmware identifier
- "mode": "CFL",             // operational mode: CFL
- "payload": {
-    "fl": ""<<double>>",    // front-left wheel angular velocity in rad/s
-    "fr": ""<<double>>",    // front-right wheel angular velocity in rad/s
-    "rl": ""<<double>>",    // rear-left wheel angular velocity in rad/s
-    "rr": ""<<double>>"     // rear-right wheel angular velocity in rad/s
+    "drill": "<<int>>",     // drill PWM in range [-255, 255]
+    "elev": "<<int>>",      // elevator PWM in range [-255, 255]
+    "conv": "<<int>>",      // three values are possible: 1 - conveyor moves in one direction, -1 - conveyor moves in another direction 0 - conveyor stops
+    "res_seq": "<<int>>"    //if the value is 1, start the research sequence
  }
 }
 ```
