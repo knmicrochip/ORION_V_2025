@@ -12,8 +12,8 @@ When the sequence is complete, compiled data is sent in a single frame to the ma
 
 ## Getting started
 ### Prerequisites
-Arduino IDE (https://www.arduino.cc/en/software/) or PlatformIO (https://platformio.org/) are required.
-You will also need libraries mentioned in "
+[Arduino IDE](https://www.arduino.cc/en/software/) or [PlatformIO](https://platformio.org/) are required.
+You will also need libraries mentioned [here]()
 
 ## Deployment instructions:
 1. Open science.ino in Arduino IDE.
