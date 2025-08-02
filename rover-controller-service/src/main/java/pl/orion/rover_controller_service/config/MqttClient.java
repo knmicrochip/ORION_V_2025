@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
