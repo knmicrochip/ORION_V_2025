@@ -18,7 +18,6 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-@Configuration
 @ConfigurationProperties
 @Slf4j
 @ToString

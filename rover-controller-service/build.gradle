@@ -17,6 +17,7 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	// mockitoAgent
 }
 
 repositories {
@@ -39,8 +40,19 @@ dependencies {
 	testImplementation 'org.testcontainers:hivemq:1.19.8'
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// testImplementation "org.mockito:mockito-core:5.+"
+	// testImplementation(libs.mockito)
+
+	// mockitoAgent(libs.mockito) {
+    //     transitive = false
+    // }
+
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+tasks {
+	test {
+		useJUnitPlatform()
+		// jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+	}
 }

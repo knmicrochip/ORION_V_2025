@@ -1,17 +1,7 @@
 {
     "configurations": [
         {
-            "type": "java",
-            "name": "Spring Boot-UartMqttGatewayApplication<uart-mqtt-gateway>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.example.uartmqttgateway.UartMqttGatewayApplication",
-            "projectName": "uart-mqtt-gateway",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        },
-        {
-            "type": "java",
+             "type": "java",
             "name": "Spring Boot-UartMqttGatewayApplication<uart-mqtt-gateway>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
