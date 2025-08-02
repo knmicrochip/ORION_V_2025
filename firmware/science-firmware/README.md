@@ -13,9 +13,24 @@ When the sequence is complete, compiled data is sent in a single frame to the ma
 ## Getting started
 ### Prerequisites
 [Arduino IDE](https://www.arduino.cc/en/software/) or [PlatformIO](https://platformio.org/) are required.
-You will also need libraries mentioned [here]()
+You will also need following libraries :
+* **[ArduinoJson v6](https://arduinojson.org/v6/)**
+* **[Stepper](https://docs.arduino.cc/libraries/stepper/)**
+* **[Wire](https://docs.arduino.cc/language-reference/en/functions/communication/wire/)**
+* **[SparkFun AS7265X Arduino Library](https://github.com/sparkfun/SparkFun_AS7265X_Arduino_Library)**
+* **[HX711](https://github.com/RobTillaart/HX711)**
 
-## Deployment instructions:
-1. Open science.ino in Arduino IDE.
-3. Select " Arduino Due (Programming Port)" in board selection menu.
-4. Compile and upload.
+You may also need to install Arduino SAM Board in Arduino IDE Boards Manager.
+
+### Deployment instructions (Arduino IDE):
+1. Make sure all sensors and wires are properly connected to the science board.
+2. Connect the Arduino Due board to your computer. Make sure you plug in the cable to the programming port of Due, not the native one.
+3. Open science.ino in Arduino IDE.
+4. Make sure all libraries mentioned above are installed.
+5. Select " Arduino Due (Programming Port)" in board selection menu.
+6. Compile and upload.
+
+## Usage
+When reset by powering on or by flashing firmware, the system will calibrate drum position, which may take a few seconds.
+When the drum stops moving the system is able to receive commands. Accepted commands are described in REQUIREMENTS.md file.
+**Note**: When research sequence is started, the device is unable to receive any commands until sequence is over.
