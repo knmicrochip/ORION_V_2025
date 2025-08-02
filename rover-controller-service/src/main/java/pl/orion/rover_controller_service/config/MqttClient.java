@@ -23,6 +23,7 @@ public class MqttClient implements DisposableBean{
 
     public MqttClient(MqttConfig mqttConfig) {
     
+        log.info(">>> Starting MQTT client with config: {}", mqttConfig);
         var client = com.hivemq.client.mqtt.MqttClient.builder()
                 .useMqttVersion5()
                 .automaticReconnect()
@@ -41,25 +42,25 @@ public class MqttClient implements DisposableBean{
         this.mqtt5AsyncClient = client;
     }
 
-    public Mqtt5AsyncClient getMqttClient() {
+    public synchronized Mqtt5AsyncClient getMqttClient() {
         return mqtt5AsyncClient;
     }
 
     @PostConstruct
     public void connect() {
 
-    mqtt5AsyncClient.connectWith()
-        .cleanStart(true)
-        .keepAlive((int) mqttConfig.getConnectionKeepaliveMs()/1000)
-        .send()
-        .whenComplete((connAck, throwable) -> {
-            if (throwable != null) {
-                log.error("Failed to connect to MQTT broker: {}", throwable.getMessage(), throwable);
-                System.exit(1);
-            } else {
-                log.info("Connected to MQTT broker at {}:{}", mqttConfig.getBrokerUrl(), mqttConfig.getBrokerPort());
-            }
-        });
+        mqtt5AsyncClient.connectWith()
+            .cleanStart(true)
+            .keepAlive((int) mqttConfig.getConnectionKeepaliveMs()/1000)
+            .send()
+            .whenComplete((connAck, throwable) -> {
+                if (throwable != null) {
+                    log.error("Failed to connect to MQTT broker: {}", throwable.getMessage(), throwable);
+                    System.exit(1);
+                } else {
+                    log.info("Connected to MQTT broker at {}:{}", mqttConfig.getBrokerUrl(), mqttConfig.getBrokerPort());
+                }
+            });
     }
 
     @Override

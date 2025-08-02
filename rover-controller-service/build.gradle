@@ -33,13 +33,12 @@ dependencies {
 	implementation 'org.slf4j:slf4j-api:2.0.13'
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'org.testcontainers:testcontainers:1.19.8'
 	testImplementation 'org.testcontainers:hivemq:1.19.8'
-	
-	
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
