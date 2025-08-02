@@ -12,7 +12,7 @@ COPY src ./src
 RUN chmod +x ./gradlew
 
 # Build the application (compiles, tests, and creates the JAR)
-RUN ./gradlew build --no-daemon -x test
+RUN ./gradlew bootJar
 
 # Stage 2: Create the final, minimal image
 FROM amazoncorretto:21-alpine
@@ -30,4 +30,4 @@ EXPOSE 8088
 # Set the entrypoint to run the application
 # Note: To access serial ports, the container must be run with appropriate privileges,
 # for example: docker run -d --privileged -v /dev:/dev uart-mqtt-gateway
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx256m", "-jar", "app.jar"]

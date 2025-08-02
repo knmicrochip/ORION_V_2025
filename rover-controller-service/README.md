@@ -86,7 +86,7 @@ mqtt:
 To build the application JAR:
 
 ```bash
-./gradlew build -x test
+./gradlew build 
 ```
 
 This command compiles the project and creates an executable JAR in `build/libs/`.
@@ -96,7 +96,7 @@ This command compiles the project and creates an executable JAR in `build/libs/`
 After building, you can run the JAR directly:
 
 ```bash
-java -jar build/libs/rover-controller-service-*.jar
+java -XX:+UseZGC -Xmx256m -jar build/libs/rover-controller-service-*.jar
 ```
 
 Remember to set the required environment variables:
@@ -105,7 +105,7 @@ Remember to set the required environment variables:
 export MQTT_USERNAME=your_username
 export MQTT_PASSWORD=your_password
 export MQTT_BROKER_URL=your_mqtt_broker_url
-java -jar build/libs/rover-controller-service-*.jar
+java -XX:+UseZGC -Xmx256m -jar build/libs/rover-controller-service-*.jar
 ```
 
 ### Build and Run with Docker
