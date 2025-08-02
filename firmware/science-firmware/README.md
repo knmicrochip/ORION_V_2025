@@ -20,7 +20,7 @@ You will also need following libraries :
 * **[SparkFun AS7265X Arduino Library](https://github.com/sparkfun/SparkFun_AS7265X_Arduino_Library)**
 * **[HX711](https://github.com/RobTillaart/HX711)**
 
-You may also need to install Arduino SAM Board in Arduino IDE Boards Manager.
+You may also need to install Arduino SAM Boards software in Arduino IDE Boards Manager.
 
 ### Deployment instructions (Arduino IDE):
 1. Make sure all sensors and wires are properly connected to the science board.
