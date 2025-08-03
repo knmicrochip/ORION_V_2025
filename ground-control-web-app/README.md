@@ -9,7 +9,9 @@ are allowed.
 The app looks like this:
 
 
-![App Screenshot](static/app_ui.jpg)
+| Main UI | Manipulator UI |
+|:---:|:---:|
+| ![App Screenshot](static/app_ui.jpg) | ![App Screenshot](static/manipulator_ui_screenshot.jpg) |
 
 ## Features
 
