@@ -43,7 +43,7 @@ def manipulator_pane(state: ManipulatorState, mqtt_client: MqttClient):
                     setattr(state, func_name, 0.0)
                     send_manipulator_data()
 
-            ui.joystick(on_move=on_move, on_end=on_end).classes('w-32 h-32 bg-blue-500 opacity-50 rounded-full border-2 border-black')
+            ui.joystick(on_move=on_move, on_end=on_end).classes('w-32 h-32 bg-[#f7a623] opacity-80 rounded-full border-2 border-black')
 
     def open_joystick_dialog(func_name: str):
         """Clear previous joystick and open the dialog with a new one."""
@@ -60,17 +60,18 @@ def manipulator_pane(state: ManipulatorState, mqtt_client: MqttClient):
             svg_width = 660
             svg_height = 550
 
-            def create_joystick_area(func_name, x, y, w, h):
+            def create_joystick_area(func_name, x, y, w, h, color):
                 style = f'left: {x/svg_width*100}%; top: {y/svg_height*100}%; width: {w/svg_width*100}%; height: {h/svg_height*100}%;'
-                element = ui.element('div').classes('absolute cursor-pointer').style(style)
+                element = ui.element('div').classes(f'absolute cursor-pointer {color} opacity-0').style(style)
                 element.on('click', lambda: open_joystick_dialog(func_name))
                 return element
 
-            create_joystick_area('flex_arm', 110, 410, 40, 40)
-            create_joystick_area('flex_forearm', 270, 250, 40, 40)
-            create_joystick_area('flex_gripper', 490, 250, 40, 40)
-            create_joystick_area('grip', 560, 320, 40, 40)
-            create_joystick_area('rotate_turret', 90, 470, 80, 80)
+            create_joystick_area('flex_arm', 44, 280, 44, 65, 'bg-[#f7a623]')
+            create_joystick_area('flex_forearm', 223, 3, 44, 65, 'bg-green-500')
+            create_joystick_area('flex_gripper', 470, 3, 44, 65, 'bg-yellow-500')
+            create_joystick_area('grip', 550, 125, 44, 65, 'bg-purple-500')
+            create_joystick_area('rotate_turret', 15, 440, 100, 80, 'bg-pink-500')
+            create_joystick_area('rotate_gripper', 365, 244, 100, 80, 'bg-blue-500')
 
         ui.separator().classes('my-4')
         

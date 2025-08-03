@@ -47,10 +47,10 @@
             <mxGeometry x="90" y="470" width="80" height="80" as="geometry" />
           </mxCell>
         </object>
-        <mxCell id="HmwWxU6DF3xo-zbIQPLF-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=23.384934;exitDy=23.384934;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=1;endArrow=open;endFill=0;dashed=1;dashPattern=8 8;" edge="1" parent="1" source="HmwWxU6DF3xo-zbIQPLF-17" target="HmwWxU6DF3xo-zbIQPLF-7">
+        <mxCell id="HmwWxU6DF3xo-zbIQPLF-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=23.384934;exitDy=23.384934;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=1;endArrow=none;endFill=0;dashed=1;dashPattern=8 8;" edge="1" parent="1" source="HmwWxU6DF3xo-zbIQPLF-17" target="HmwWxU6DF3xo-zbIQPLF-7">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <object label="" id="HmwWxU6DF3xo-zbIQPLF-17">
+        <object label="" manipulator_func="rotate_gripper" id="HmwWxU6DF3xo-zbIQPLF-17">
           <mxCell style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.bendDoubleArrow;dy=8.19;dx=41.35;arrowHead=29.43;rounded=1;rotation=-135;fillColor=#F7A623;" vertex="1" parent="1">
             <mxGeometry x="399.9985424949238" y="359.9985424949238" width="80" height="80" as="geometry" />
           </mxCell>
