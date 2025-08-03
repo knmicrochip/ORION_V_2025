@@ -26,5 +26,7 @@ MQTT_PASSWORD = os.environ.get("MQTT_PASSWORD", "user")
 
 MQTT_TOPICS = {
     'chassis_output': 'orion/topic/chassis/outbound',
-    'chassis_input': 'orion/topic/chassis/controller/inbound'
+    'chassis_input': 'orion/topic/chassis/controller/inbound',
+    'manipulator_output': 'orion/topic/manipulator/outbound',
+    'manipulator_input': 'orion/topic/manipulator/controller/inbound'
 }

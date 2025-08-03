@@ -3,7 +3,7 @@ from app.ui.chassis_pane import chassis_pane
 from app.ui.manipulator_pane import manipulator_pane
 from app.ui.science_pane import science_pane
 from app.ui.menu import menu
-from app.state import ChassisState
+from app.state import ChassisState, ManipulatorState
 from app.logic.gamepad import process_gamepad_data
 from app.logic.mqtt_client import MqttClient
 from app.config import setup_logging, MQTT_TOPICS
@@ -14,8 +14,9 @@ app.add_static_files('/static', 'static') # Explicitly add static files director
 
 ui.add_head_html('<link rel="stylesheet" href="/static/theme.css">')
 
-# Shared state
-state = ChassisState()
+# Shared states
+chassis_state = ChassisState()
+manipulator_state = ManipulatorState()
 mqtt_client = MqttClient()
 
 # Global content area reference
@@ -40,19 +41,25 @@ def switch_pane(pane_name: str):
     with content_area:
         content_area.clear()
         # Disconnect from previous topic if any
-        if state.active_topic:
-            mqtt_client.unsubscribe(state.active_topic, state.telemetry_callback)
-            state.active_topic = None
-            state.telemetry_callback = None
+        if chassis_state.active_topic:
+            mqtt_client.unsubscribe(chassis_state.active_topic, chassis_state.telemetry_callback)
+            chassis_state.active_topic = None
+            chassis_state.telemetry_callback = None
+        if manipulator_state.active_topic:
+            mqtt_client.unsubscribe(manipulator_state.active_topic, manipulator_state.telemetry_callback)
+            manipulator_state.active_topic = None
+            manipulator_state.telemetry_callback = None
 
         if pane_name == 'chassis':
-            chassis_pane(state, mqtt_client)
-            state.active_topic = MQTT_TOPICS['chassis_output']
-            state.telemetry_callback = lambda topic, payload: telemetry_content.refresh('Chassis', payload)
-            mqtt_client.subscribe(state.active_topic, state.telemetry_callback)
+            chassis_pane(chassis_state, mqtt_client)
+            chassis_state.active_topic = MQTT_TOPICS['chassis_output']
+            chassis_state.telemetry_callback = lambda topic, payload: telemetry_content.refresh('Chassis', payload)
+            mqtt_client.subscribe(chassis_state.active_topic, chassis_state.telemetry_callback)
         elif pane_name == 'manipulator':
-            manipulator_pane()
-            telemetry_content.refresh('Manipulator')
+            manipulator_pane(manipulator_state, mqtt_client)
+            manipulator_state.active_topic = MQTT_TOPICS['manipulator_output']
+            manipulator_state.telemetry_callback = lambda topic, payload: telemetry_content.refresh('Manipulator', payload)
+            mqtt_client.subscribe(manipulator_state.active_topic, manipulator_state.telemetry_callback)
         elif pane_name == 'science':
             science_pane()
             telemetry_content.refresh('Science')
@@ -84,7 +91,7 @@ def main_page():
         # Initial content
     switch_pane('chassis')
 
-    ui.on('gamepad_data_event', lambda e: process_gamepad_data(e.args, state, mqtt_client))
+    ui.on('gamepad_data_event', lambda e: process_gamepad_data(e.args, chassis_state, mqtt_client))
 
     # Inject Gamepad JS
     ui.add_body_html('<script src="/static/gamepad_logic.js"></script>')

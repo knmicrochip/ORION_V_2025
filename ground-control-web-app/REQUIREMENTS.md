@@ -135,10 +135,10 @@ a configurable value). Therefore there will be only one event to subscribe to.
 | `grip` | [-1.0, 1.0] | Closes/opens the gripper: -1.0 - opens at max speed, 1.0 - closes at max speed |
 
 3. The user shall be able to tap elements described with the attribute `manipulator_func`. 
-The action shall display a NiceGUI draggable on top of the tapped element.
-To hide the draggable element, the user will tap at any other place on the screen.
+The action shall display a NiceGUI `ui.joystick` widget on top of the tapped element.
+To hide the widget, the user will tap at any other place on the screen.
 
-1. The events shall be issued whenever a user acts on the draggable element.
+1. The events shall be issued whenever a user acts on the `ui.joystick` widget.
 
 1. The application shall display a row of Xbox-colored buttons, with labels 
 `X`, `Y`, `A`, `B` and batching colors. These buttons generate events that 
@@ -209,6 +209,8 @@ UI events as described in [Playground pane: Manipulator](#playground-pane-manipu
 1. The application shall display maniplator telemetry in the telemetry pane.
 It will subscribe to `orion/topic/manipulator/outbound` and display incoming raw JSON
 messages.
+1. The application shall send messages onto a downstream topic `orion/topic/manipulator/controller/inbound` and follow the JSON schema as defined in [Outbound Manipulator JSON schema](#outbound-manipulator-json-schema)
+
 
 ### Outbound Manipulator JSON schema
 
@@ -236,20 +238,22 @@ UI or gamepad shall rely on the schema.
 
 ### UI Manipulator JSON schema mapping
 
-1. The UI shall be mapped to the schema as described in the table below:
+1. The user shall act on the UI, which triggers `ui.joystick` related events that
+will be captured, serialized and send downstream.
+1. The UI events shall be mapped to the schema as described in the table below:
 
-| UI event | Field in JSON schema | Description |
-|----------|----------------------|-------------|
-| `rotate_turret` | `payload.rotate_turret` | Rotates the turret |
-| `flex_forearm` | `payload.flex_forearm` | Flexes the forearm |
-| `flex_arm` | `payload.flex_arm` | Flexes the arm |
-| `flex_gripper` | `payload.flex_gripper` | Flexes the gripper |
-| `rotate_gripper` | `payload.rotate_gripper` | Rotates the gripper |
-| `grip` | `payload.grip` | Closes/opens the gripper |
-| `button_x` | `payload.button_x` | Pre-programmed action #1 |
-| `button_y` | `payload.button_y` | Pre-programmed action #2 |
-| `button_a` | `payload.button_a` | Pre-programmed action #3 |
-| `button_b` | `payload.button_b` | Pre-programmed action #4 |
+| UI event | Field in JSON schema | `ui.joystick` mapping | Description |
+|----------|----------------------|------------------ | ----------- | 
+| `rotate_turret` | `payload.rotate_turret` | Use event `event.x` for `ui.joystick` mapping | Rotates the turret |
+| `flex_forearm` | `payload.flex_forearm` | Use event `-1*event.y` for `ui.joystick` mapping | Flexes the forearm |
+| `flex_arm` | `payload.flex_arm` | Use event `-1*event.y` for `ui.joystick` mapping | Flexes the arm |
+| `flex_gripper` | `payload.flex_gripper` | Use event `-1*event.x` for `ui.joystick` mapping | Flexes the gripper |
+| `rotate_gripper` | `payload.rotate_gripper` | Use event `-1*event.x` for `ui.joystick` mapping | Rotates the gripper |
+| `grip` | `payload.grip` | Use event `event.x` for `ui.joystick` mapping | Closes/opens the gripper |
+| `button_x` | `payload.button_x` | N/A | Pre-programmed action #1 |
+| `button_y` | `payload.button_y` | N/A | Pre-programmed action #2 |
+| `button_a` | `payload.button_a` | N/A | Pre-programmed action #3 |
+| `button_b` | `payload.button_b` | N/A | Pre-programmed action #4 |
 
 
 
