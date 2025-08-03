@@ -136,7 +136,8 @@ a configurable value). Therefore there will be only one event to subscribe to.
 
 3. The user shall be able to tap elements described with the attribute `manipulator_func`. 
 The action shall display a NiceGUI `ui.joystick` widget on top of the tapped element.
-To hide the widget, the user will tap at any other place on the screen.
+To hide the widget, the user will tap at any other place on the screen. Use `ui.dialog` to implement 
+such a feature.
 
 1. The events shall be issued whenever a user acts on the `ui.joystick` widget.
 
