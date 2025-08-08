@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>
 #include "operational_mode_runner.h"
 #include "motor_runner.h"
+#include <arduino-timer.h>
+
 /*
 {"eventType":"chassis","mode":"PWM"}
 {"eventType":"chassis","mode":"CFL"}
@@ -18,6 +20,7 @@ RosOperationalMode OperationalModeRunner::rosMode;
 // Define global variables
 OperationalModeRunner runner;
 StaticJsonDocument<256> json;
+auto timer = timer_create_default();
 
 unsigned long lastExecutionTime = 0;
 
@@ -26,11 +29,15 @@ void setup() {
     setupPWM();
     while(!Serial);
     
-    
+    timer.every(100, [](void *) {
+      runner.run();
+      return true;
+    });
 }
 
 void loop() {
-    runner.run();
+    timer.tick(); 
+
     //Serial.print("TIC ");
     //Serial.print(millis());
     if(Serial.available()) 
@@ -52,7 +59,7 @@ void loop() {
     if (currentTime - lastExecutionTime > 1000) {
       auto feedback = runner.generateFeedback();
       serializeJson(feedback, Serial);
-      //Serial.print("\n\n");                       // globally agreed delimiter for UART messages
+      Serial.print("\n\n");                       // globally agreed delimiter for UART messages
 
       lastExecutionTime = currentTime;
     }

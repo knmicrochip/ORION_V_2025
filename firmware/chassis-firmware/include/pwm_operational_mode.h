@@ -1,10 +1,11 @@
 #pragma once
 #include "crtp_operational_mode.h"
 #include "motor_runner.h"
-#include "TimerOne.h"
 
 class PwmOperationalMode : public OperationalModeCrtp<PwmOperationalMode>
 {
+    static constexpr int8_t ENABLE_DEBUG = 1; // Set to 1 to enable debug output, 0 to disable
+
     int16_t fl_pwm = 0;
     int16_t fr_pwm = 0;
     int16_t rl_pwm = 0;
@@ -37,7 +38,7 @@ public:
         {
             // Serial.print("Ramp functionality here ");
             lastExecutionTime = currentTime;
-            runMotorsWithPWM(fl_pwm, rl_pwm, fr_pwm, rr_pwm, 1);
+            runMotorsWithPWM(fl_pwm, rl_pwm, fr_pwm, rr_pwm);
         }
     }
     StaticJsonDocument<CAPACITY> feedbackImpl()
