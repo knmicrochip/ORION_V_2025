@@ -241,6 +241,28 @@ chassis:
 
 ## Manipulator integration requirements
 
+### Payloads
+#### Inbound payload
+
+```
+{
+  "eventType": "manipulator",
+  "payload": {
+    "rotate_turret": <<double>>,  // [-1.0, 1.0] - rotate [left, right]
+    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
+    "flex_arm": <<double>>,       // [-1.0, 1.0] - flex [up, down]
+    "flex_gripper": <<double>>,   // [-1.0, 1.0] - flex [up, down]
+    "rotate_gripper": <<double>>, // [-1.0, 1.0] - rotate [left, right]
+    "grip": <<double>>,           // [-1.0, 1.0] - grip [open, close]
+    "button_x": true|false,       // pre-programmed action #1
+    "button_y": true|false,       // pre-programmed action #2
+    "button_a": true|false,       // pre-programmed action #3
+    "button_b": true|false        // pre-programmed action #4
+  }
+}
+```
+
+
 * The manipulator shall use the following MQTT topic configuration for inbound and outbound traffic:
 
 ```
