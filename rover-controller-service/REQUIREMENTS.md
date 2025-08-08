@@ -262,6 +262,71 @@ chassis:
 }
 ```
 
+### Operational mode
+
+PWM
+CFL
+
+#### Manipulator operational mode: PWM Mode
+##### Inbound
+
+(payload under 400 bytes)
+```
+{
+  "eventType": "manipulator",
+  "mode": "PWM",
+  "payload": {
+    "rotate_turret": <<int8_t>>,  // [-100, 100] - rotate [left, right], units: PWM in percent
+    "flex_forearm": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percent
+    "flex_arm": <<int8_t>>,       // [-100, 100] - flex [up, down], units: PWM in percent
+    "flex_gripper": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percent
+    "rotate_gripper": <<int8_t>>, // [-100, 100] - rotate [left, right], units: PWM in percent
+    "end_effector": <<int8_t>>,   // [-100, 100] - end effector (i.e., gripper, a shovel) [open, close], units: PWM in percent
+  }
+}
+```
+
+##### Outbound
+
+```
+(payload under 400 bytes)
+{
+  "eventType": "manipulator",
+  "mode": "PWM",
+  "payload": {
+    "amps_rotate_turret": <<int8_t>>,  // [0, 100] - rotate [left, right] in percent
+    "amps_flex_forearm": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
+    "amps_flex_arm": <<int8_t>>,       // [0, 100] - flex [up, down] in percent
+    "amps_flex_gripper": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
+    "amps_rotate_gripper": <<int8_t>>, // [0, 100] - rotate [left, right] in percent
+    "amps_end_effector": <<int8_t>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
+    "ang_rotate_turret": <<double>>,  // [0, 5PI/3] - angle, Cartesian coordinates [rotated maximally to right, rotated maximally to left]
+    "ang_flex_forearm": <<double>>,   // [0, 100] - flex [up, down] in percent
+    "ang_flex_arm": <<double>>,       // [0, 100] - flex [up, down] in percent
+    "ang_flex_gripper": <<double>>,   // [0, 100] - flex [up, down] in percent
+    "ang_rotate_gripper": <<double>>, // [0, 100] - rotate [left, right] in percent
+    "ang_end_effector": <<double>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
+  }
+}
+```
+#### Manipulator operational mode: CFL Mode
+
+```
+{
+  "eventType": "manipulator",
+  "mode": "CFL",
+  "payload": {
+    "rotate_turret": <<double>>,  // [-1000, 1000] - rotate [left, right] mrad/s
+    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
+    "flex_arm": <<double>>,       // [-1.0, 1.0] - flex [up, down]
+    "flex_gripper": <<double>>,   // [-1.0, 1.0] - flex [up, down]
+    "rotate_gripper": <<double>>, // [-1.0, 1.0] - rotate [left, right]
+    "grip": <<double>>,           // [-1.0, 1.0] - grip [open, close]
+    
+  }
+}
+```
+
 
 * The manipulator shall use the following MQTT topic configuration for inbound and outbound traffic:
 
@@ -272,7 +337,7 @@ manipulator:
         inbound: orion/topic/manipulator/inbound
         outbound: orion/topic/manipulator/outbound
     upstream:
-        inbound: 
+        inbound: orion/topic/manipulator/controller/inbound
 ```
 
 ## Science integration requirements
