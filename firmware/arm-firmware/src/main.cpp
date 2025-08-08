@@ -1,12 +1,18 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "motor_runner.h"
-
-
+#include "arm_setup.h"
+//1-base
+//2-arm
+//3-elbow
+//4-wrist
+//5-rotate
+//6-gripper
+//7-shovel
 
 StaticJsonDocument<256> json;
 
 unsigned long lastExecutionTime = 0;
+const char *mode;
 
 void setup() {
     Serial.begin(115200);
@@ -23,7 +29,7 @@ void loop() {
       
       if (error == DeserializationError::Ok) 
       {
-        const char *mode = json["mode"];
+        mode = json["mode"];
         
         
       }
