@@ -1,4 +1,4 @@
-# Overview
+# Requirements overview
 
 This document specifies a list of requirements for the `rover-controller-service` project.
 The application is designed to link near real-time event processing with the remote control of a robotic platform.
@@ -45,6 +45,7 @@ mqtt:
 is established
 * Application liveness must be defined as: the application maintains connectivity with the MQTT broker
 * The application shall use `mqtt://` protocol by default
+* The application shall use MQTT QoS 1 setting (at least once delivery)
 * The garbage collector shall be tuned for the lowest possible latency
 
 ## Testing
@@ -57,13 +58,16 @@ is established
 
 # Functional requirements
 
+## `application.yml` configuration template
+[`application.yml` configuration template](#applicationyml-configuration-template)
+
 Configuration fields for the `rover-controller-service` must be defined as follows:
 * Whenever the `downstream.inbound` topic is mentioned, the application shall publish to it.
 * Whenever the `downstream.outbound` topic is mentioned, the application shall subscribe to it.
 * Whenever the `upstream.inbound` topic is mentioned, the application shall subscribe to it.
 * Whenever the `upstream.outbound` topic is mentioned, the application shall publish to it.
 
-Template (follow *integration requirements* sections below for more details):
+Template (follow *integration requirements* sections below for more details on `application.yml` configuration per specific *business-category*):
 ```
 <<business-category>>:
     eventType: <<category-name>>
@@ -94,250 +98,17 @@ Template (follow *integration requirements* sections below for more details):
 
 ## Chassis integration requirements
 
+* All functional chasiss integration requirements shall be defined in the [Chassis Integration Requirements](./REQUIREMENTS_CHASSIS.md) file
+* All above-mentioned functional and non-functional requirements shall be applied
 
-* The hardware chassis shall be equipped with 4 fixed wheels, with each pair of wheels installed on the same axle.
-* The hardware chassis shall support only a [differential drive controller](https://en.wikipedia.org/wiki/Differential_wheeled_robot) for locomotion.
-* The chassis must be equipped with encoders to read the angular velocity of each wheel.
-
-### Payloads
-
-#### Inbound payload
-
-* The application shall receive the following payload from the topic configured under  
-`chassis.upstream.inbound`:
-
-```
-{
-  "eventType": "chassis",
-  "payload": {
-    "stick": [x_value_real, y_value_real],
-    "button_x": true|false,
-    "button_y": true|false,
-    "button_a": true|false,
-    "button_b": true|false,
-    "rotate": [z_value_real]
-  }
-}
-```
-
-| field | type | value range | description |
-| --- | --- | --- | --- |
-| payload.stick[0] | double | [-1.0, 1.0] | Turn [left, right]. A value of '-1' sets the maximum turn to the right, and '1' sets the maximum turn to the left. |
-| payload.stick[1] | double | [-1.0, 1.0] | Drive [forward, backward]. A value of '-1' sets the maximum drive forward, and '1' sets the maximum drive backward. |
-| payload.rotate | double | [-1.0, 1.0] | Turn in-place [left, right]. A value of '-1' sets the maximum turn to the left, and '1' sets the maximum turn to the right. |
-| payload.button_(x\|y\|a\|b) | boolean | true|false | Not implemented yet | 
-
-#### Outbound payloads
-
-* Outbound payloads shall be strictly linked with the [operational modes](#operational-modes)
-configured for the robot.
-
-
-### Operational modes
-* The application shall three distinct operational modes:
-
-    * **PWM Mode**: Receives a command from the upstream, remaps it onto PWM values for each
-wheel, and sends it downstream. 
-    * **CFL Mode** (Closed Feedback Loop): Receives a command from the upstream, remaps it into 
-angular velocity values for each wheel, and sends them downstream.
-    * **ROS Mode**: Receives a command from the upstream, remaps it into a ROS-compatible 
-[Twist](https://docs.ros.org/en/foxy/api/geometry_msgs/html/msg/Twist.html) messages 
-messages with linear and angular velocity for precise rover control,
-including slip compensation and terrain adaptation
-
-* The application shall support more modes in future
-* Operational modes shall be swappable in real-time, supported by the 
-[strategy pattern](https://en.wikipedia.org/wiki/Strategy_pattern).
-
-
-#### Chassis operational mode: PWM Mode
-
-
-* The application shall map the inbound payload to the outbound payload by applying the
-control principles outlined in the table below:
-
-    * Joystick X,Y-axis commands shall be translated to the following values:
-
-| payload.stick[0] | payload.stick[1] | Left PWM | Right PWM | Behavior |
-| :-- | :-- | :-- | :-- | :-- |
-| 0 | -1 | -255 | -255 | Full speed forward |
-| 0 | 1 | 255 | 255 | Full speed backward |
-| 0 | 0 | 0 | 0 | No movement |
-| -0.3 | 0.7 | 101 | 255 | Forward with gentle left curve |
-| 0.3 | 0.7 | 255 | 101 | Forward with gentle right curve |
-| -0.7 | 0.7 | 0 | 255 | Sharp left turn (left wheels stopped) |
-| 0.7 | 0.7 | 255 | 0 | Sharp right turn (right wheels stopped) |
-
-* The application shall prioritize `payload.stick[]` input over payload.rotate:
-    * All `abs(payload.stick[])` values must be lower than 0.1, and `abs(payload.rotate)` must be
-    greater than 0.25 to activate in-place robot rotation.
-    * The Z-axis joystick shall be translated to control in-place robot rotation:
-
-| payload.rotate | Left PWM | Right PWM | Behavior |
-| :-- | :-- | :-- | :-- |
-| -1 | -255 | 255 | In-place left rotation |
-|1 | 255 | -255 | In-place right rotation |
-
-
-##### PWM Mode: outbound payload
-```
-{
- "eventType": "chassis",    // Unique firmware identifier for chassis telemetry
- "mode": "pwm",             // operational mode: PWM
- "payload": {
-    "fl": "<<int16>>",      // front-left wheel PWM in range [-255, 255]
-    "fr": "<<int16>>",      // front-right wheel PWM in range [-255, 255]
-    "rl": "<<int16>>",      // rear-left wheel PWM in range [-255, 255]
-    "rr": "<<int16>>"       // rear-right wheel PWM in range [-255, 255]
- }
-}
-```
-
-#### Chassis operational mode: CFL Mode
-
-CFL Mode requirements: TBD 
-##### CFL Mode: Outbound payload
-
-```
-{
- "eventType": "chassis",    // Unique firmware identifier for chassis telemetry
- "mode": "CFL",             // operational mode: CFL
- "payload": {
-    "fl": "<<double>>",    // Front-left wheel angular velocity in rad/s
-    "fr": "<<double>>",    // Front-right wheel angular velocity in rad/s
-    "rl": "<<double>>",    // Rear-left wheel angular velocity in rad/s
-    "rr": "<<double>>"     // Rear-right wheel angular velocity in rad/s
- }
-}
-```
-
-#### Chassis operational mode: ROS Mode
-
-CFL Mode requirements: TBD 
-
-##### ROS Mode: Outbound payload
-```
-{
- "eventType": "chassis",    // Unique firmware identifier for chassis telemetry
- "mode": "ROS",             // operational mode: ROS
- "payload": {
-    "linear": [<<double>>, <<double>>, <<double>>],     // Vector3 (x, y, z) expressed in m/s
-    "angular": [<<double>>, <<double>>, <<double>>]     // Vector3 (x, y, z) expressed in rad/s
- }
-}
-```
-
-### Chassis integration: application.yml configuration
-
-```
-chassis:
-    eventType: chassis
-    downstream:
-        inbound: orion/topic/chassis/inbound
-        outbound: orion/topic/chassis/outbound
-    upstream:
-        inbound: orion/topic/chassis/controller/inbound
-```        
 
 ## Manipulator integration requirements
 
-### Payloads
-#### Inbound payload
+* All functional manipulator integration requirements shall be defined in the [Manipulator Integration Requirements](./REQUIREMENTS_MANIPULATOR.md) file
+* All above-mentioned functional and non-functional requirements shall be applied
 
-```
-{
-  "eventType": "manipulator",
-  "payload": {
-    "rotate_turret": <<double>>,  // [-1.0, 1.0] - rotate [left, right]
-    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
-    "flex_arm": <<double>>,       // [-1.0, 1.0] - flex [up, down]
-    "flex_gripper": <<double>>,   // [-1.0, 1.0] - flex [up, down]
-    "rotate_gripper": <<double>>, // [-1.0, 1.0] - rotate [left, right]
-    "grip": <<double>>,           // [-1.0, 1.0] - grip [open, close]
-    "button_x": true|false,       // pre-programmed action #1
-    "button_y": true|false,       // pre-programmed action #2
-    "button_a": true|false,       // pre-programmed action #3
-    "button_b": true|false        // pre-programmed action #4
-  }
-}
-```
-
-### Operational mode
-
-PWM
-CFL
-
-#### Manipulator operational mode: PWM Mode
-##### Inbound
-
-(payload under 400 bytes)
-```
-{
-  "eventType": "manipulator",
-  "mode": "PWM",
-  "payload": {
-    "rotate_turret": <<int8_t>>,  // [-100, 100] - rotate [left, right], units: PWM in percent
-    "flex_forearm": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percent
-    "flex_arm": <<int8_t>>,       // [-100, 100] - flex [up, down], units: PWM in percent
-    "flex_gripper": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percent
-    "rotate_gripper": <<int8_t>>, // [-100, 100] - rotate [left, right], units: PWM in percent
-    "end_effector": <<int8_t>>,   // [-100, 100] - end effector (i.e., gripper, a shovel) [open, close], units: PWM in percent
-  }
-}
-```
-
-##### Outbound
-
-```
-(payload under 400 bytes)
-{
-  "eventType": "manipulator",
-  "mode": "PWM",
-  "payload": {
-    "amps_rotate_turret": <<int8_t>>,  // [0, 100] - rotate [left, right] in percent
-    "amps_flex_forearm": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
-    "amps_flex_arm": <<int8_t>>,       // [0, 100] - flex [up, down] in percent
-    "amps_flex_gripper": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
-    "amps_rotate_gripper": <<int8_t>>, // [0, 100] - rotate [left, right] in percent
-    "amps_end_effector": <<int8_t>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
-    "ang_rotate_turret": <<double>>,  // [0, 5PI/3] - angle, Cartesian coordinates [rotated maximally to right, rotated maximally to left]
-    "ang_flex_forearm": <<double>>,   // [0, 100] - flex [up, down] in percent
-    "ang_flex_arm": <<double>>,       // [0, 100] - flex [up, down] in percent
-    "ang_flex_gripper": <<double>>,   // [0, 100] - flex [up, down] in percent
-    "ang_rotate_gripper": <<double>>, // [0, 100] - rotate [left, right] in percent
-    "ang_end_effector": <<double>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
-  }
-}
-```
-#### Manipulator operational mode: CFL Mode
-
-```
-{
-  "eventType": "manipulator",
-  "mode": "CFL",
-  "payload": {
-    "rotate_turret": <<double>>,  // [-1000, 1000] - rotate [left, right] mrad/s
-    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
-    "flex_arm": <<double>>,       // [-1.0, 1.0] - flex [up, down]
-    "flex_gripper": <<double>>,   // [-1.0, 1.0] - flex [up, down]
-    "rotate_gripper": <<double>>, // [-1.0, 1.0] - rotate [left, right]
-    "grip": <<double>>,           // [-1.0, 1.0] - grip [open, close]
-    
-  }
-}
-```
-
-
-* The manipulator shall use the following MQTT topic configuration for inbound and outbound traffic:
-
-```
-manipulator:
-    eventType: manipulator
-    downstream:
-        inbound: orion/topic/manipulator/inbound
-        outbound: orion/topic/manipulator/outbound
-    upstream:
-        inbound: orion/topic/manipulator/controller/inbound
-```
 
 ## Science integration requirements
+
+* All functional manipulator integration requirements shall be defined in the [Science Integration Requirements](./REQUIREMENTS_SCIENCE.md) file
+* All above-mentioned functional and non-functional requirements shall be applied
