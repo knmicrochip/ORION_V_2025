@@ -96,8 +96,12 @@ control principles outlined in the table below:
 | 0 | -1 | -255 | 255 | Full speed forward |
 | 0 | 1 | 255 | -255 | Full speed backward |
 | 0 | 0 | 0 | 0 | No movement |
-| -0.3 | -0.7 | 101 | 255 | Forward with gentle left curve |
-| 0.3 | -0.7 | 255 | 101 | Forward with gentle right curve |
+| -0.3 | -0.7 | 179 | 255 | Forward with gentle left curve |
+| 0.3 | -0.7 | 255 | 178 | Forward with gentle right curve |
+| -1 | -0.3 | -77 | 255 | Hard left turn, while driving forward |
+| 1 | -0.3 | -255 | 77 | Hard right turn, while driving forward |
+| -1 | 0.3 | 77 | -255 | Hard left turn, while driving backward |
+| 1 | 0.3 | -255 | 77 | Hard right turn, while driving backward |
 | -1 | 0 | 0 | 255 | Sharp left turn (left wheels stopped) |
 | 1 | 0 | 255 | 0 | Sharp right turn (right wheels stopped) |
 

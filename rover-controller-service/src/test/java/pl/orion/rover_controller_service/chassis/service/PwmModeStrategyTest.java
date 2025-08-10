@@ -24,7 +24,7 @@ class PwmModeStrategyTest {
     }
     
     @Test
-    void testFullSpeedForward() {
+    void testFullSpeedBackward() {
         // stick[0] = 0 (no turn), stick[1] = 1 (full forward)
         double[] stick = {0.0, 1.0};
         double[] rotate = {0.0};
@@ -36,13 +36,13 @@ class PwmModeStrategyTest {
         ChassisPwmOutboundPayload outboundPayload = (ChassisPwmOutboundPayload) pwmModeStrategy.process(inboundPayload);
         
         assertEquals(255, outboundPayload.payload().fl());
-        assertEquals(255, outboundPayload.payload().fr());
+        assertEquals(-255, outboundPayload.payload().fr());
         assertEquals(255, outboundPayload.payload().rl());
-        assertEquals(255, outboundPayload.payload().rr());
+        assertEquals(-255, outboundPayload.payload().rr());
     }
     
     @Test
-    void testFullSpeedBackward() {
+    void testFullSpeedForward() {
         // stick[0] = 0 (no turn), stick[1] = -1 (full backward)
         double[] stick = {0.0, -1.0};
         double[] rotate = {0.0};
@@ -54,9 +54,9 @@ class PwmModeStrategyTest {
         ChassisPwmOutboundPayload outboundPayload = (ChassisPwmOutboundPayload) pwmModeStrategy.process(inboundPayload);
         
         assertEquals(-255, outboundPayload.payload().fl());
-        assertEquals(-255, outboundPayload.payload().fr());
+        assertEquals(255, outboundPayload.payload().fr());
         assertEquals(-255, outboundPayload.payload().rl());
-        assertEquals(-255, outboundPayload.payload().rr());
+        assertEquals(255, outboundPayload.payload().rr());
     }
     
     @Test
@@ -79,8 +79,8 @@ class PwmModeStrategyTest {
     
     @Test
     void testForwardWithGentleLeftCurve() {
-        // stick[0] = -0.3 (left turn), stick[1] = 0.7 (forward)
-        double[] stick = {-0.3, 0.7};
+        // stick[0] = -0.3 (left turn), stick[1] = -0.7 (forward)
+        double[] stick = {-0.3, -0.7};
         double[] rotate = {0.0};
         
         ChassisInboundPayload.ChassisPayload payload = 
@@ -89,21 +89,17 @@ class PwmModeStrategyTest {
         
         ChassisPwmOutboundPayload outboundPayload = (ChassisPwmOutboundPayload) pwmModeStrategy.process(inboundPayload);
         
-        // Left wheels should have lower PWM than right wheels
-        assertTrue(outboundPayload.payload().fl() < outboundPayload.payload().fr());
-        assertTrue(outboundPayload.payload().rl() < outboundPayload.payload().rr());
-        
-        // Both should be positive (forward)
-        assertTrue(outboundPayload.payload().fl() > 0);
-        assertTrue(outboundPayload.payload().fr() > 0);
-        assertTrue(outboundPayload.payload().rl() > 0);
-        assertTrue(outboundPayload.payload().rr() > 0);
+        assertEquals(-101, outboundPayload.payload().fl()); 
+        assertEquals(-101, outboundPayload.payload().rl()); 
+
+        assertEquals(255, outboundPayload.payload().fr()); 
+        assertEquals(255, outboundPayload.payload().rr()); 
     }
     
     @Test
     void testForwardWithGentleRightCurve() {
-        // stick[0] = 0.3 (right turn), stick[1] = 0.7 (forward)
-        double[] stick = {0.3, 0.7};
+        // stick[0] = 0.3 (right turn), stick[1] = -0.7 (forward)
+        double[] stick = {0.3, -0.7};
         double[] rotate = {0.0};
         
         ChassisInboundPayload.ChassisPayload payload = 
@@ -112,21 +108,16 @@ class PwmModeStrategyTest {
         
         ChassisPwmOutboundPayload outboundPayload = (ChassisPwmOutboundPayload) pwmModeStrategy.process(inboundPayload);
         
-        // Right wheels should have lower PWM than left wheels
-        assertTrue(outboundPayload.payload().fr() < outboundPayload.payload().fl());
-        assertTrue(outboundPayload.payload().rr() < outboundPayload.payload().rl());
-        
-        // Both should be positive (forward)
-        assertTrue(outboundPayload.payload().fl() > 0);
-        assertTrue(outboundPayload.payload().fr() > 0);
-        assertTrue(outboundPayload.payload().rl() > 0);
-        assertTrue(outboundPayload.payload().rr() > 0);
+        assertEquals(101, outboundPayload.payload().fr()); 
+        assertEquals(101, outboundPayload.payload().rr()); 
+        assertEquals(-255, outboundPayload.payload().fl()); 
+        assertEquals(-255, outboundPayload.payload().rl()); 
+
     }
     
     @Test
     void testSharpLeftTurn() {
-        // stick[0] = -0.7 (left turn), stick[1] = 0.7 (forward)
-        double[] stick = {-0.7, 0.7};
+        double[] stick = {-1.0, 0.0};
         double[] rotate = {0.0};
         
         ChassisInboundPayload.ChassisPayload payload = 
@@ -147,7 +138,7 @@ class PwmModeStrategyTest {
     @Test
     void testSharpRightTurn() {
         // stick[0] = 0.7 (right turn), stick[1] = 0.7 (forward)
-        double[] stick = {0.7, 0.7};
+        double[] stick = {1.0, 0.0};
         double[] rotate = {0.0};
         
         ChassisInboundPayload.ChassisPayload payload = 
