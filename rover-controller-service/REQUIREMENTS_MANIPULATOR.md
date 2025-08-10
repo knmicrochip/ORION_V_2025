@@ -50,6 +50,31 @@ manipulator:
         outbound: orion/topic/manipulator/outbound
     upstream:
         inbound: orion/topic/manipulator/controller/inbound
+    joints:
+        turret_rotation:
+          max_ang_v: PI/10       // max angular velocity in radians
+          min_pos: 0             // min absolute position in radians
+          max_pos: 5PI/3         // max absolute position in radians
+        forearm_flex:
+          max_ang_v: PI/10       // max angular velocity in radians
+          min_pos: 0             // min absolute position in radians
+          max_pos: 2PI/3         // max absolute position in radians
+        arm_flex:
+          max_ang_v: PI/10       // max angular velocity in radians
+          min_pos: 0             // min absolute position in radians
+          max_pos: 2PI/3         // max absolute position in radians
+        gripper_flex:
+          max_ang_v: PI/10       // max angular velocity in radians
+          min_pos: 0             // min absolute position in radians
+          max_pos: 2PI/3         // max absolute position in radians
+        gripper_rotation:
+          max_ang_v: PI/10       // max angular velocity in radians
+          min_pos: 0             // min absolute position in radians
+          max_pos: 2PI           // max absolute position in radians
+        end_effector_flex:
+          max_ang_v: PI/10       // max angular velocity in radians
+          min_pos: 0             // min absolute position in radians
+          max_pos: PI/4          // max absolute position in radians
 ```
 
 ## Payloads
@@ -61,6 +86,7 @@ manipulator:
 ```
 {
   "eventType": "manipulator",
+  "mode": "PWM|CFL|POS|INV_K",    // operational mode: PWM|CFL|POS|INV_K, PWM by default if `mode` is not present
   "payload": {
     "rotate_turret": <<double>>,  // [-1.0, 1.0] - rotate [left, right]
     "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
@@ -93,12 +119,12 @@ as described in section [Manipulator automation](#manipulator-automation)
     "amps_flex_gripper": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
     "amps_rotate_gripper": <<int8_t>>, // [0, 100] - rotate [left, right] in percent
     "amps_end_effector": <<int8_t>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
-    "ang_rotate_turret": <<double>>,  // [0, 5PI/3] - angle, Cartesian coordinates [rotated maximally to right, rotated maximally to left]
-    "ang_flex_forearm": <<double>>,   // [0, 100] - flex [up, down] in percent
-    "ang_flex_arm": <<double>>,       // [0, 100] - flex [up, down] in percent
-    "ang_flex_gripper": <<double>>,   // [0, 100] - flex [up, down] in percent
-    "ang_rotate_gripper": <<double>>, // [0, 100] - rotate [left, right] in percent
-    "ang_end_effector": <<double>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
+    "ang_rotate_turret": <<double>>,  // [0, 5PI/3] - angle, absolute position, expressed in radians
+    "ang_flex_forearm": <<double>>,   // [0, 2PI/3] - angle, absolute position, expressed in radians
+    "ang_flex_arm": <<double>>,       // [0, 2PI/3] - angle, absolute position, expressed in radians 
+    "ang_flex_gripper": <<double>>,   // [0, 2PI/3] - angle, absolute position, expressed in radians
+    "ang_rotate_gripper": <<double>>, // [0, 2PI]   - angle, absolute position, expressed in radians
+    "ang_end_effector": <<double>>,   // [0, PI/4]  - angle, absolute position, expressed in radians 
   }
 }
 ```
@@ -115,7 +141,15 @@ configured for the robot.
     * **Manipulator PWM Mode**: (Open Feedback Loop) Receives a command from the upstream, remaps it onto PWM values for each manipulator joint, and sends it downstream. 
     * **Manipulator CFL Mode** (Closed Feedback Loop): Receives a command from the upstream, remaps it into angular velocity values for each manipulator joint, and sends them downstream.
     * **Manipulator POS Mode** (Position Control): Receives a command from the upstream, remaps it into
-    a tranlation
+    a the absolute position of each manipulator joint, and sends them downstream.
+    * **Manipulator INV_K Mode** (Inverse Kinematics): Receives a command from the upstream
+     (a translation and rotation quaternions of an end effector), plans and computes movement of each
+     manipulator component, and sends the POS commands downstream.
+
+* An operational mode shall be selectable in run time, supported by the 
+[strategy pattern](https://en.wikipedia.org/wiki/Strategy_pattern).
+* Each operational mode strategy implementation shall access telemetry messages published by the
+microcontroller under `manipulator.downstream.outbound` topic.
 
 * The application should support *manipulator automation* and executions of predefened actions,
  including folding the manipulator, setting it to a manipulator-ready state, etc.
@@ -126,26 +160,82 @@ configured for the robot.
 
 
 ### Manipulator operational mode: PWM Mode
+
+PWM mode configuration is meant to provide the most basic form of controlling 
+manipulator effectors remotely. This is the quickest way to implement and test the hardware
+yet it proved to be good enough to control the manipulator in real life scenarios. Each
+manipulator effector uses high gear ratio, which minimizes the risks of inconsistent
+joint rotation.
+
+* The PWM mode shall convert upstream input into PWM values expressed in percentage 
+* The PWM mode shall rely on on open feedback loop to control the manipulator joints
+* The operator shall manually control the PWM that is applied to each joint, individually
+* The payload shall be sent onto `manipulator.downstream.inbound` topic
+* The exact input-to-output mapping rules are presented in the table below
+
+| Input field from `manipulator.upstream.inbound` | Output field to `manipulator.downstream.inbound` | Input value | Mapped output value | Description | 
+| :-- | :-- | :-- | :-- | :-- |
+| `payload.rotate_turret` | `payload.rotate_turret` | [-1.0, 1.0] | [-100, 100] | Rotate about Y-axis |
+| `payload.flex_forearm` | `payload.flex_forearm` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
+| `payload.flex_arm` | `payload.flex_arm` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
+| `payload.flex_gripper` | `payload.flex_gripper` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
+| `payload.rotate_gripper` | `payload.rotate_gripper` | [-1.0, 1.0] | [-100, 100] | Rotate about X-axis |
+| `payload.end_effector` | `payload.end_effector` | [-1.0, 1.0] | [-100, 100] | Grip/open-close a lid in the shovel;, values <0 expand the grip; values >1 close the grip |
+
+
+
 #### Manipulator PWM mode: Outbound traffic
 
-(payload under 400 bytes)
+* The payload shall not exceed 400 bytes
+* The payload should be formatted in a compact JSON form
+
+PWM mode payload:
+
 ```
 {
   "eventType": "manipulator",
-  "mode": "PWM",
+  "mode": "PWM",                  // PWM mode indicator
   "payload": {
-    "rotate_turret": <<int8_t>>,  // [-100, 100] - rotate [left, right], units: PWM in percent
-    "flex_forearm": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percent
-    "flex_arm": <<int8_t>>,       // [-100, 100] - flex [up, down], units: PWM in percent
-    "flex_gripper": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percent
-    "rotate_gripper": <<int8_t>>, // [-100, 100] - rotate [left, right], units: PWM in percent
-    "end_effector": <<int8_t>>,   // [-100, 100] - end effector (i.e., gripper, a shovel) [open, close], units: PWM in percent
+    "rotate_turret": <<int8_t>>,  // [-100, 100] - rotate [left, right], units: PWM in percentage
+    "flex_forearm": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percentage
+    "flex_arm": <<int8_t>>,       // [-100, 100] - flex [up, down], units: PWM in percentage
+    "flex_gripper": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percentage
+    "rotate_gripper": <<int8_t>>, // [-100, 100] - rotate [left, right], units: PWM in percentage
+    "end_effector": <<int8_t>>,   // [-100, 100] - end effector (i.e., gripper, a shovel) [open, close], units: PWM in percentage
   }
 }
 ```
 
 ### Manipulator operational mode: CFL Mode
 
+The CFL mode is meant to control each effector individually with a constant speed, regardless
+of the load that each effector might experience. The manipulator firmware shall apply PID
+regulator to precisely control angular velocity of each joint. This mode is a step forward
+towards full *POS mode*.
+
+
+* The CFL mode shall convert upstream input into angular velocity values for each joint 
+expressed in `rad/s` unit
+* The CFL mode shall rely on closed feedback loop to control the speed of each manipulator joint
+* The operator shall manually control the angular velocity that is applied to each joint, individually
+* The payload shall be sent onto `manipulator.downstream.inbound` topic
+* The exact input-to-output mapping rules are presented in the table below
+
+| Input field from `manipulator.upstream.inbound` | Output field to `manipulator.downstream.inbound` | Input value | MAX_ANG_V:double constant | Mapped output value | Description | 
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| `payload.rotate_turret` | `payload.rotate_turret` | `input`=[-1.0, 1.0] | `MAX_TURRET_ROT_ANG_V` | `MAX_TURRET_ROT_ANG_V*input` | Rotate about Y-axis |
+| `payload.flex_forearm` | `payload.flex_forearm` | `input`=[-1.0, 1.0] | `MAX_FOREARM_FLEX_ANG_V` | `MAX_FOREARM_FLEX_ANG_V*input` | Flex about Z-axis |
+| `payload.flex_arm` | `payload.flex_arm` | `input`=[-1.0, 1.0] | `MAX_ARM_FLEX_ANG_V` | `MAX_ARM_FLEX_ANG_V*input` | Flex about Z-axis |
+| `payload.flex_gripper` | `payload.flex_gripper` | `input`=[-1.0, 1.0] | `MAX_GRIPPER_FLEX_ANG_V` | `MAX_GRIPPER_FLEX_ANG_V*input` | Flex about Z-axis |
+| `payload.rotate_gripper` | `payload.rotate_gripper` | `input`=[-1.0, 1.0] | `MAX_GRIPPER_ROT_ANG_V` | `MAX_GRIPPER_ROT_ANG_V*input` | Rotate about X-axis |
+| `payload.end_effector` | `payload.end_effector` | `input`=[-1.0, 1.0] | `MAX_END_EFFECTOR_ANG_V` | `MAX_END_EFFECTOR_ANG*input` | Grip/open-close a lid in the shovel;, values <0 expand the grip; values >1 close the grip |
+
+#### Manipulator CFL mode: Outbound traffic
+
+* The payload shall not exceed 400 bytes
+* The payload should be formatted in a compact JSON form
+
+PWM mode payload:
 ```
 {
   "eventType": "manipulator",
@@ -162,10 +252,26 @@ configured for the robot.
 }
 ```
 
+### Manipulator operational mode: POS Mode
+
+TBD
+
+### Manipulator operational mode: INV_K Mode
+
+TBD
+
 ### Manipulator automation
 
 * The manipulator automation shall rely on `POS` Mode to apply a desired state
 * The manipulator automation shall prevent executing another action while the current
 automatic action is in progress
+  * The software shall subscribe to inbound telemetry messages from `manipulator.upstream.outbound` topic
+  * The telemetry messages shall help tracking the execution progress with a 1% accuracy, i.e,. for a range of *PI/2 rad*, it gives an error range of `+/-PI/200 rad`. 
+  Say, a joint must be set to `PI/4`, therefore the correct set shall be `PI/4 +/-PI/200 rad` or `[49PI/200, 51PI/200] rad`
+
 * The manipulator automation shall be immediately interrupted if *upstream.inbound* traffic
 is registered. The human command is always a priority
+* Each present shall be assigned to a separate command issued by upstream application:
+  * `button_x` shall trigger a folding action
+  * `button_y` shall trigger a setting to a manipulator-ready state
+  * etc.
