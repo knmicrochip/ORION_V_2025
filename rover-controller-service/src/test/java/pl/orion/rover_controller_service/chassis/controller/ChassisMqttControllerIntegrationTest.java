@@ -1,16 +1,5 @@
 package pl.orion.rover_controller_service.chassis.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
-import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
-
-import pl.orion.rover_controller_service.chassis.config.ChassisConfig;
-import pl.orion.rover_controller_service.chassis.config.ChassisProperties;
-import pl.orion.rover_controller_service.chassis.model.ChassisInboundPayload;
-import pl.orion.rover_controller_service.chassis.model.ChassisPwmOutboundPayload;
-import pl.orion.rover_controller_service.config.MqttClient;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -19,14 +8,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
+
+import pl.orion.rover_controller_service.chassis.config.ChassisProperties;
+import pl.orion.rover_controller_service.chassis.model.ChassisInboundPayload;
+import pl.orion.rover_controller_service.chassis.model.ChassisPwmOutboundPayload;
+import pl.orion.rover_controller_service.config.MqttClient;
 
 @ActiveProfiles("test")
 @PropertySource("classpath:application-test.properties")
@@ -34,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 class ChassisMqttControllerIntegrationTest {
     
     @Autowired
+    @Qualifier("chassisObjectMapper")
     private ObjectMapper objectMapper;
 
     @Autowired

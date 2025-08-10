@@ -89,8 +89,8 @@ manipulator:
   "mode": "PWM|CFL|POS|INV_K",    // operational mode: PWM|CFL|POS|INV_K, PWM by default if `mode` is not present
   "payload": {
     "rotate_turret": <<double>>,  // [-1.0, 1.0] - rotate [left, right]
-    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
     "flex_arm": <<double>>,       // [-1.0, 1.0] - flex [up, down]
+    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down]
     "flex_gripper": <<double>>,   // [-1.0, 1.0] - flex [up, down]
     "rotate_gripper": <<double>>, // [-1.0, 1.0] - rotate [left, right]
     "grip": <<double>>,           // [-1.0, 1.0] - grip [open, close]
@@ -114,14 +114,14 @@ as described in section [Manipulator automation](#manipulator-automation)
   "mode": "PWM",
   "payload": {
     "amps_rotate_turret": <<int8_t>>,  // [0, 100] - rotate [left, right] in percent
-    "amps_flex_forearm": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
     "amps_flex_arm": <<int8_t>>,       // [0, 100] - flex [up, down] in percent
+    "amps_flex_forearm": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
     "amps_flex_gripper": <<int8_t>>,   // [0, 100] - flex [up, down] in percent
     "amps_rotate_gripper": <<int8_t>>, // [0, 100] - rotate [left, right] in percent
     "amps_end_effector": <<int8_t>>,   // [0, 100] - end effector (i.e., gripper, a shovel) [open, close] in percent
     "ang_rotate_turret": <<double>>,  // [0, 5PI/3] - angle, absolute position, expressed in radians
-    "ang_flex_forearm": <<double>>,   // [0, 2PI/3] - angle, absolute position, expressed in radians
     "ang_flex_arm": <<double>>,       // [0, 2PI/3] - angle, absolute position, expressed in radians 
+    "ang_flex_forearm": <<double>>,   // [0, 2PI/3] - angle, absolute position, expressed in radians
     "ang_flex_gripper": <<double>>,   // [0, 2PI/3] - angle, absolute position, expressed in radians
     "ang_rotate_gripper": <<double>>, // [0, 2PI]   - angle, absolute position, expressed in radians
     "ang_end_effector": <<double>>,   // [0, PI/4]  - angle, absolute position, expressed in radians 
@@ -176,8 +176,8 @@ joint rotation.
 | Input field from `manipulator.upstream.inbound` | Output field to `manipulator.downstream.inbound` | Input value | Mapped output value | Description | 
 | :-- | :-- | :-- | :-- | :-- |
 | `payload.rotate_turret` | `payload.rotate_turret` | [-1.0, 1.0] | [-100, 100] | Rotate about Y-axis |
-| `payload.flex_forearm` | `payload.flex_forearm` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
 | `payload.flex_arm` | `payload.flex_arm` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
+| `payload.flex_forearm` | `payload.flex_forearm` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
 | `payload.flex_gripper` | `payload.flex_gripper` | [-1.0, 1.0] | [-100, 100] | Flex about Z-axis |
 | `payload.rotate_gripper` | `payload.rotate_gripper` | [-1.0, 1.0] | [-100, 100] | Rotate about X-axis |
 | `payload.end_effector` | `payload.end_effector` | [-1.0, 1.0] | [-100, 100] | Grip/open-close a lid in the shovel;, values <0 expand the grip; values >1 close the grip |
@@ -197,8 +197,8 @@ PWM mode payload:
   "mode": "PWM",                  // PWM mode indicator
   "payload": {
     "rotate_turret": <<int8_t>>,  // [-100, 100] - rotate [left, right], units: PWM in percentage
-    "flex_forearm": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percentage
     "flex_arm": <<int8_t>>,       // [-100, 100] - flex [up, down], units: PWM in percentage
+    "flex_forearm": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percentage
     "flex_gripper": <<int8_t>>,   // [-100, 100] - flex [up, down], units: PWM in percentage
     "rotate_gripper": <<int8_t>>, // [-100, 100] - rotate [left, right], units: PWM in percentage
     "end_effector": <<int8_t>>,   // [-100, 100] - end effector (i.e., gripper, a shovel) [open, close], units: PWM in percentage
@@ -224,8 +224,8 @@ expressed in `rad/s` unit
 | Input field from `manipulator.upstream.inbound` | Output field to `manipulator.downstream.inbound` | Input value | MAX_ANG_V:double constant | Mapped output value | Description | 
 | :-- | :-- | :-- | :-- | :-- | :-- |
 | `payload.rotate_turret` | `payload.rotate_turret` | `input`=[-1.0, 1.0] | `MAX_TURRET_ROT_ANG_V` | `MAX_TURRET_ROT_ANG_V*input` | Rotate about Y-axis |
-| `payload.flex_forearm` | `payload.flex_forearm` | `input`=[-1.0, 1.0] | `MAX_FOREARM_FLEX_ANG_V` | `MAX_FOREARM_FLEX_ANG_V*input` | Flex about Z-axis |
 | `payload.flex_arm` | `payload.flex_arm` | `input`=[-1.0, 1.0] | `MAX_ARM_FLEX_ANG_V` | `MAX_ARM_FLEX_ANG_V*input` | Flex about Z-axis |
+| `payload.flex_forearm` | `payload.flex_forearm` | `input`=[-1.0, 1.0] | `MAX_FOREARM_FLEX_ANG_V` | `MAX_FOREARM_FLEX_ANG_V*input` | Flex about Z-axis |
 | `payload.flex_gripper` | `payload.flex_gripper` | `input`=[-1.0, 1.0] | `MAX_GRIPPER_FLEX_ANG_V` | `MAX_GRIPPER_FLEX_ANG_V*input` | Flex about Z-axis |
 | `payload.rotate_gripper` | `payload.rotate_gripper` | `input`=[-1.0, 1.0] | `MAX_GRIPPER_ROT_ANG_V` | `MAX_GRIPPER_ROT_ANG_V*input` | Rotate about X-axis |
 | `payload.end_effector` | `payload.end_effector` | `input`=[-1.0, 1.0] | `MAX_END_EFFECTOR_ANG_V` | `MAX_END_EFFECTOR_ANG*input` | Grip/open-close a lid in the shovel;, values <0 expand the grip; values >1 close the grip |
@@ -235,18 +235,18 @@ expressed in `rad/s` unit
 * The payload shall not exceed 400 bytes
 * The payload should be formatted in a compact JSON form
 
-PWM mode payload:
+CFL mode payload:
 ```
 {
   "eventType": "manipulator",
   "mode": "CFL",
   "payload": {
     "rotate_turret": <<double>>,  // [-1.0, 1.0] - rotate [left, right], units: rad/s
-    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down], units: rad/s
     "flex_arm": <<double>>,       // [-1.0, 1.0] - flex [up, down], units: rad/s
+    "flex_forearm": <<double>>,   // [-1.0, 1.0] - flex [up, down], units: rad/s
     "flex_gripper": <<double>>,   // [-1.0, 1.0] - flex [up, down], units: rad/s
     "rotate_gripper": <<double>>, // [-1.0, 1.0] - rotate [left, right], units: rad/s
-    "grip": <<double>>,           // [-1.0, 1.0] - grip [open, close], units: rad/s
+    "end_effector": <<double>>,           // [-1.0, 1.0] - grip [open, close], units: rad/s
     
   }
 }
