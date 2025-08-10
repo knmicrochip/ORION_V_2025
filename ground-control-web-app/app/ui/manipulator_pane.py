@@ -24,14 +24,10 @@ def manipulator_pane(state: ManipulatorState, mqtt_client: MqttClient):
             
             def on_move(e):
                 if not state.gamepad_active:
-                    if func_name == 'rotate_turret':
+                    if func_name in ['rotate_turret', 'rotate_gripper']:
                         value = e.x
-                    elif func_name in ['flex_forearm', 'flex_arm']:
+                    elif func_name in ['flex_forearm', 'flex_arm', 'flex_gripper', 'grip']:
                         value = -1 * e.y
-                    elif func_name in ['flex_gripper', 'rotate_gripper']:
-                        value = -1 * e.x
-                    elif func_name == 'grip':
-                        value = e.x
                     else:
                         value = 0
                     
@@ -66,12 +62,12 @@ def manipulator_pane(state: ManipulatorState, mqtt_client: MqttClient):
                 element.on('click', lambda: open_joystick_dialog(func_name))
                 return element
 
-            create_joystick_area('flex_arm', 44, 280, 44, 65, 'bg-[#f7a623]')
-            create_joystick_area('flex_forearm', 223, 3, 44, 65, 'bg-green-500')
-            create_joystick_area('flex_gripper', 470, 3, 44, 65, 'bg-yellow-500')
-            create_joystick_area('grip', 550, 125, 44, 65, 'bg-purple-500')
-            create_joystick_area('rotate_turret', 15, 440, 100, 80, 'bg-pink-500')
-            create_joystick_area('rotate_gripper', 365, 244, 100, 80, 'bg-blue-500')
+            create_joystick_area('flex_arm (up-down)', 44, 280, 44, 65, 'bg-[#f7a623]')
+            create_joystick_area('flex_forearm (up-down)', 223, 3, 44, 65, 'bg-green-500')
+            create_joystick_area('flex_gripper (up-down)', 470, 3, 44, 65, 'bg-yellow-500')
+            create_joystick_area('grip (up-down)', 550, 125, 44, 65, 'bg-purple-500')
+            create_joystick_area('rotate_turret (left-right)', 15, 440, 100, 80, 'bg-pink-500')
+            create_joystick_area('rotate_gripper (left-right)', 365, 244, 100, 80, 'bg-blue-500')
 
         ui.separator().classes('my-4')
         
