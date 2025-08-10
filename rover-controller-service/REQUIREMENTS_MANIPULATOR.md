@@ -8,6 +8,7 @@ The initial functional and non-functional requirements have been defined in the
 [Requirements](./REQUIREMENTS.md) file. These shall be applied on top of the specification
 defined below.
 
+## Hardware design
 Hardware design overview, essentials for the software development:
 
 * The manipulator shall be a 6-Degree-of-Freedom device installed directly on
@@ -171,6 +172,9 @@ joint rotation.
 * The PWM mode shall rely on on open feedback loop to control the manipulator joints
 * The operator shall manually control the PWM that is applied to each joint, individually
 * The payload shall be sent onto `manipulator.downstream.inbound` topic
+* The negative values shall rotate the joints counter-clock wise and positive
+values shall rotate joints in clockwise direction, assuming the plane as described in 
+[Hardware design](#hardware-design)
 * The exact input-to-output mapping rules are presented in the table below
 
 | Input field from `manipulator.upstream.inbound` | Output field to `manipulator.downstream.inbound` | Input value | Mapped output value | Description | 
@@ -219,6 +223,9 @@ expressed in `rad/s` unit
 * The CFL mode shall rely on closed feedback loop to control the speed of each manipulator joint
 * The operator shall manually control the angular velocity that is applied to each joint, individually
 * The payload shall be sent onto `manipulator.downstream.inbound` topic
+* The negative values shall rotate the joints counter-clock wise and positive
+values shall rotate joints in clockwise direction, assuming the plane as described in 
+[Hardware design](#hardware-design)
 * The exact input-to-output mapping rules are presented in the table below
 
 | Input field from `manipulator.upstream.inbound` | Output field to `manipulator.downstream.inbound` | Input value | MAX_ANG_V:double constant | Mapped output value | Description | 

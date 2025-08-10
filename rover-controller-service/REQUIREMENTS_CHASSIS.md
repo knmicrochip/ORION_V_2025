@@ -1,8 +1,14 @@
 # [Functional Requirements] Chassis integration requirements
 
+> The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", 
+> "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be 
+> interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+
 The initial functional and non-functional requirements have been defined in the 
 [Requirements](./REQUIREMENTS.md) file. These shall be applied on top of the specification
 defined below.
+
+## Hardware design
 
 Hardware design overview, essentials for the software development:
 
