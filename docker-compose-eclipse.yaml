@@ -1,0 +1,90 @@
+services:
+  # mqtt5 eclipse-mosquitto
+  mqtt5:
+    image: eclipse-mosquitto
+    container_name: mqtt5
+    mem_limit: 512m
+    mem_reservation: 512m
+    ports:
+      - "1883:1883" #default mqtt port
+      - "9001:9001" #default mqtt port for websockets
+    restart: unless-stopped
+    user: "${UID:-1000}:${GID:-1000}"
+    command: sh -c "
+      /mosquitto/config/create_default_user.sh && \
+      mosquitto -c /mosquitto/config/mosquitto.conf"
+    volumes:
+      - ./mqtt-server/eclipse-mosquitto/config/:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+    environment:
+      - MQTT_USERNAME=${MQTT_USERNAME:-user}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
+    networks:
+      - orion-network
+
+  # uart-mqtt-gateway service
+  uart-mqtt-gateway:
+    build: ./uart-mqtt-gateway
+    container_name: uart-mqtt-gateway
+    mem_limit: 256m
+    mem_reservation: 256m
+    user: "root:root"   # A bit dangerous, but needed for serial port access for now
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /dev:/dev
+    environment:
+      - MQTT_USERNAME=${MQTT_USERNAME:-user}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
+      - UART_MQTT_GATEWAY_MQTT_BROKER_URL=mqtt5
+    depends_on:
+      - mqtt5
+    ports:
+      - "8088:8088"
+    networks:
+      - orion-network
+
+  # rover-controller-service service
+  rover-controller-service:
+    build: ./rover-controller-service
+    container_name: rover-controller-service
+    mem_limit: 256m
+    mem_reservation: 256m
+    restart: unless-stopped
+    volumes:
+      - /dev:/dev
+    environment:
+      - MQTT_USERNAME=${MQTT_USERNAME:-user}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
+      - MQTT_BROKER_URL=mqtt5
+    depends_on:
+      - mqtt5
+    ports:
+      - "8880:8880"
+    networks:
+      - orion-network
+
+  ground-control-web-app:
+    build: ./ground-control-web-app
+    container_name: ground-control-web-app
+    environment:
+      - MQTT_USERNAME=${MQTT_USERNAME:-user}
+      - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
+      - MQTT_BROKER_URL=${IP_ADDRESS_OF_HOST_PC_IN_LOCAL_NETWORK:-mqtt5}
+      - MQTT_BROKER_PORT=9001
+    user: "${UID:-1000}:${GID:-1000}"
+    restart: unless-stopped
+    depends_on:
+      - mqtt5
+    ports:
+      - "8080:8080"
+    networks:
+      - orion-network
+
+volumes:
+  mosquitto-data:
+    driver: local
+
+networks:
+  orion-network:
+    driver: bridge
