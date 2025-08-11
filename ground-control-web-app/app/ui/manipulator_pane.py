@@ -14,6 +14,12 @@ def manipulator_pane(state: ManipulatorState, mqtt_client: MqttClient):
             logger.info(f"Sending manipulator data: {state.get_payload()}")
             mqtt_client.publish(MQTT_TOPICS['manipulator_input'], state.get_payload())
 
+    def handle_gamepad_input(gamepad_data):
+        """Handle manipulator control logic from gamepad data."""
+        # This is a stub for you to fill in.
+        # Example: state.rotate_turret = gamepad_data['axes'][0]
+        logger.info(f"Manipulator gamepad data: {gamepad_data}")
+
     with ui.dialog() as joystick_dialog, ui.card().classes('w-80 h-80 flex flex-col items-center justify-center'):
         joystick_container = ui.column().classes('items-center')
 

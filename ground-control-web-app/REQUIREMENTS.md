@@ -99,7 +99,7 @@ The event can be subscribed later. The event shall be represented as `"left_stic
 
 3. Under the `ui.joystick` widget, you will place another `ui.joystick` known as rotation slider. The slider reflect
 the Z-axis in the joystick such as Logitech Extreme 3D Pro.
-The slider shall use values between -100 and 100. Whenever the user drops the slider button, it is automatically reset to 0, exactly in the middle of the slider. The values shall map
+The slider shall use values between -1.0 and 1.0. Whenever the user drops the slider button, it is automatically reset to 0, exactly in the middle of the slider. The values shall map
 to `axes[2]` in Gamepad API, which corresponds to `rotate` field in the 
 'Chassis JSON message' below.
 
@@ -114,7 +114,7 @@ These buttons generate events that correspond to a click (a brief press and rele
 ```
 
 5. Whenever any state associated with the widget is triggered, 
-emit all current values within the payload, no more frequent than 50Hz (this should be 
+emit all current values within the payload, no more frequent than 20Hz (this should be 
 a configurable value). Therefore there will be only one event to subscribe to.
 
 ### Playground pane: Manipulator

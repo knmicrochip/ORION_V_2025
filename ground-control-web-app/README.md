@@ -87,6 +87,13 @@ uv run main.py
 
 The application will be accessible at `http://localhost:8080`.
 
+If you don't see your changes, it might be useful to clear all environment cache:
+
+```
+uv clean
+for cache in $(find ./app -name '__pycache__' -type d); do rm -rf $cache; done; echo 'Cleared cache'
+```
+
 ### Docker
 
 To build and run the application using Docker:

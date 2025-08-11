@@ -91,7 +91,7 @@ def main_page():
         # Initial content
     switch_pane('chassis')
 
-    ui.on('gamepad_data_event', lambda e: process_gamepad_data(e.args, chassis_state, mqtt_client))
+    ui.on('gamepad_data_event', lambda e: process_gamepad_data(e, chassis_state, manipulator_state, mqtt_client))
 
     # Inject Gamepad JS
     ui.add_body_html('<script src="/static/gamepad_logic.js"></script>')

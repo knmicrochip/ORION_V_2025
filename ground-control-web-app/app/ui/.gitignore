@@ -1,0 +1,4 @@
+uv.lock
+__py*
+__pycache__
+*/__py*

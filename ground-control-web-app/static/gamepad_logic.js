@@ -26,9 +26,11 @@ function pollGamepads() {
             for (const gamepad of active_gamepads) {
                 if (gamepad && gamepads[gamepad.index]) { // Ensure it's a connected gamepad we're tracking
                     let data = {
+                        id: gamepad.id,
                         index: gamepad.index,
                         axes: gamepad.axes.map(a => a.toFixed(4)),
                         buttons: gamepad.buttons.map(b => b.pressed),
+                        values: gamepad.buttons.map(b => b.value.toFixed(4))
                     };
                     gamepad_data.push(data);
                 }
@@ -54,6 +56,6 @@ window.addEventListener("gamepaddisconnected", (e) => { gamepadHandler(e, false)
 // Start continuous gamepad polling
 console.log("NiceGUI is ready. Starting continuous gamepad polling.");
 if (intervalId === null) { // Ensure interval is only set once
-    intervalId = setInterval(pollGamepads, 20); // Poll every 20ms
+    intervalId = setInterval(pollGamepads, 50); // Poll every 50ms
     console.log("Started continuous gamepad polling. Interval ID:", intervalId);
 }
