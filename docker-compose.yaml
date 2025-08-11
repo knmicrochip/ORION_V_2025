@@ -3,6 +3,8 @@ services:
   mqtt5:
     image: eclipse-mosquitto
     container_name: mqtt5
+    mem_limit: 512m
+    mem_reservation: 512m
     ports:
       - "1883:1883" #default mqtt port
       - "9001:9001" #default mqtt port for websockets
@@ -24,6 +26,8 @@ services:
   uart-mqtt-gateway:
     build: ./uart-mqtt-gateway
     container_name: uart-mqtt-gateway
+    mem_limit: 256m
+    mem_reservation: 256m
     user: "root:root"   # A bit dangerous, but needed for serial port access for now
     privileged: true
     restart: unless-stopped
@@ -44,6 +48,8 @@ services:
   rover-controller-service:
     build: ./rover-controller-service
     container_name: rover-controller-service
+    mem_limit: 256m
+    mem_reservation: 256m
     restart: unless-stopped
     volumes:
       - /dev:/dev
