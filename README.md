@@ -108,6 +108,7 @@ For example:
 This project is authored by:
 * [Krzysztof Kruk](https://github.com/krkruk)
 * [MasterOfJunk](https://github.com/MasterOfJunk)
+* and other KN Microchip students at Lublin University of Technology
 
 ## License
 
