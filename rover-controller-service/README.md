@@ -4,6 +4,8 @@
 
 This project, `rover-controller-service`, is designed to link real-time event processing with the remote control of a robotic platform. It aggregates various hardware modules, including chassis, manipulator, and science, implementing their corresponding behaviors.
 
+All service requirements have been listed here: [REQUIREMENTS.md](./REQUIREMENTS.md]
+
 ## Tech Stack
 
 The application is built using the following technologies:
