@@ -260,7 +260,22 @@ will be captured, serialized and send downstream.
 
 ### Gamepad Manipulator JSON schema mapping
 
-1. The gamepad integration shall not be implemented, for now
+1. The gamepad integration is assigned to a controller that contains 'Xbox Controller' in its ID string (case-insensitive).
+2. The gamepad events shall be mapped to the schema as described in the table below:
+
+| Gamepad API mapping | Field in JSON schema | Description |
+|---|---|---|
+| `axes[0]` (Left Stick X) | `payload.rotate_gripper` | Rotates the gripper |
+| `axes[1]` (Left Stick Y) | `payload.flex_gripper` | Flexes the gripper |
+| `axes[2]` (Right Stick X) | `payload.flex_arm` | Flexes the arm |
+| `axes[3]` (Right Stick Y) | `payload.flex_forearm` | Flexes the forearm |
+| `-value(buttons[6])` if not `buttons[7]` else `value(buttons[7])` | `payload.rotate_turret` | Rotates the turret (using triggers) |
+| `-value(buttons[4])` if `buttons[4]` else `value(buttons[5])` | `payload.grip` | Opens/closes the gripper (using bumpers) |
+| `buttons[2]` | `payload.button_x` | Pre-programmed action #1 |
+| `buttons[3]` | `payload.button_y` | Pre-programmed action #2 |
+| `buttons[0]` | `payload.button_a` | Pre-programmed action #3 |
+| `buttons[1]` | `payload.button_b` | Pre-programmed action #4 |
+
 
 
 ## Science active state
