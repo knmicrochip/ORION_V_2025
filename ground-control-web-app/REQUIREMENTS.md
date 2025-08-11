@@ -273,6 +273,7 @@ Apply the following MQTT configs:
 * Broker address: ws://mqtt5:9001
 * Protocol version: 5
 * Automatic reconnection attempts: yet, at intervals of 5 seconds
+* Quality of Service: 1 (at least once)
 * Client-id: ground-control-web-app-${timestamp}
 * User: user
 * Password: user

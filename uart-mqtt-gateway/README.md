@@ -41,6 +41,8 @@ The service leverages Java multithreading capabilities:
 field (`eventType`, by default) to match configuration and corresponding MQTT topics
 * The configuration is specified in a separate file: `uart-mqtt-mapping.yml`
 * The application is launched on port 8088 by default (see yaml configuration)
+* The MQTT configuration relies on Quality of Service = 1 (at least once delivery)
+* The garbage collector shall be tuned for the lowest possible latency
 
 A typical flow (here Chassis control is an example) can be summarized with the following sequence diagram:
 

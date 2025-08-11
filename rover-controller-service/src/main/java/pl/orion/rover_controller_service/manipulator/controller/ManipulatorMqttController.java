@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 
@@ -42,6 +43,7 @@ public class ManipulatorMqttController {
 
         mqttClient.subscribeWith()
                 .topicFilter(manipulatorInboundTopic)
+                .qos(MqttQos.AT_LEAST_ONCE)
                 .callback(this::handleInboundMessage)
                 .send()
                 .whenComplete((subAck, throwable) -> {

@@ -1,6 +1,7 @@
 package pl.orion.rover_controller_service.chassis.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class ChassisMqttController {
         
         mqttClient.subscribeWith()
             .topicFilter(chassisInboundTopic)
+            .qos(MqttQos.AT_LEAST_ONCE)
             .callback(this::handleInboundMessage)
             .send()
             .whenComplete((subAck, throwable) -> {
@@ -98,6 +100,7 @@ public class ChassisMqttController {
         
         mqttClient.publishWith()
             .topic(chassisOutboundTopic)
+            .qos(MqttQos.AT_LEAST_ONCE)
             .payload(payload.getBytes(StandardCharsets.UTF_8))
             .qos(com.hivemq.client.mqtt.datatypes.MqttQos.AT_LEAST_ONCE)
             .send()

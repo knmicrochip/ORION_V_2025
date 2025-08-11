@@ -19,6 +19,8 @@ from app.config import (
 logger = logging.getLogger(__name__)
 
 class MqttClient:
+    _QUALITY_OF_SERVICE = 1 # At least once
+    
     def __init__(self):
         self.client_id = f"{MQTT_CLIENT_ID_PREFIX}{int(time.time())}"
         self.client = mqtt.Client(client_id=self.client_id, protocol=mqtt.MQTTv5, transport='websockets')
@@ -82,7 +84,7 @@ class MqttClient:
                 if time_to_wait > 0:
                     await asyncio.sleep(time_to_wait)
 
-                self.client.publish(topic, json.dumps(payload))
+                self.client.publish(topic, json.dumps(payload), qos=self._QUALITY_OF_SERVICE)
                 self.last_publish_time = time.time()
                 self.publish_queue.task_done()
             except asyncio.CancelledError:
@@ -115,7 +117,7 @@ class MqttClient:
         if topic not in self.message_callbacks:
             self.message_callbacks[topic] = []
         self.message_callbacks[topic].append(callback)
-        self.client.subscribe(topic)
+        self.client.subscribe(topic, options=mqtt.SubscribeOptions(qos=self._QUALITY_OF_SERVICE))
         logger.info(f"Subscribed to topic: {topic}")
 
     def unsubscribe(self, topic: str, callback):

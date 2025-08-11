@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.hivemq.client.mqtt.datatypes.MqttQos;
+
 import pl.orion.rover_controller_service.config.MqttClient;
 import pl.orion.rover_controller_service.manipulator.config.ManipulatorProperties;
 import pl.orion.rover_controller_service.manipulator.model.ManipulatorInboundPayload;
@@ -41,6 +43,7 @@ public class ManipulatorModeManager {
     private void send(byte[] payload) {
         mqttClient.getMqttClient().publishWith()
                 .topic(manipulatorProperties.downstream().inbound())
+                .qos(MqttQos.AT_LEAST_ONCE)
                 .payload(payload)
                 .send();
     }

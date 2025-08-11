@@ -1,6 +1,7 @@
 package pl.orion.uart_mqtt_gateway.service;
 
 import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ public class MqttServiceImpl implements MqttService {
     public void publish(String topic, String payload) {
         client.publishWith()
                 .topic(topic)
+                .qos(MqttQos.AT_LEAST_ONCE)
                 .payload(payload.getBytes())
                 .send();
     }
@@ -63,6 +65,7 @@ public class MqttServiceImpl implements MqttService {
     public void subscribe(String topic, MqttMessageHandler handler) {
         client.subscribeWith()
                 .topicFilter(topic)
+                .qos(MqttQos.AT_LEAST_ONCE)
                 .callback(publish -> handler.handleMessage(topic, new String(publish.getPayloadAsBytes())))
                 .send();
     }
