@@ -6,6 +6,8 @@ The app is meant to be hosted on the onboard computer and accessible in any devi
 strickly controlled, the application does not bother with racy conditions and multiple users at the same time
 are allowed.
 
+All service requirements have been listed here: [REQUIREMENTS.md](./REQUIREMENTS.md]
+
 The app looks like this:
 
 
