@@ -116,7 +116,7 @@ const int laserOn = 8;
 
 void measureGas(struct sample *sample){
   digitalWrite(MQon,HIGH);
-  delay(120000);
+  delay(45000);
   analogWrite(laserOn,255);
   delay(10000);
   analogWrite(laserOn,0);
@@ -245,12 +245,15 @@ uint8_t clockPin = 46;
 void researchSequence(sample *sample){
   sample->mass = scale.get_units(10);
   rotateDrum();
+  delay(1000);
+  rotateDrum();
+  delay(500);
   measureTemp(sample);
+  delay(500);
   rotateDrum();
   measureSpectro(sample);
   rotateDrum();
-  //measureGas(sample);
-  rotateDrum();
+  measureGas(sample);
   rotateDrum();
   rotateDrum();
   rotateDrum();
@@ -389,7 +392,7 @@ void loop() {
           conveyor(0);
           sendTelemetry();
           currSample += 1;
-          researchSequence(samples[currSample]);
+          researchSequence(samples[currSample-1]);
         }
       }
     }
