@@ -377,7 +377,7 @@ void loop() {
     packetBuffer = Serial.readString();
     StaticJsonDocument<255> command;
     deserializeJson(command, packetBuffer);
-    if(command["eventType"] == "science" && packetBuffer.substring(packetBuffer.length()-4) == "\n\n"){
+    if(command["eventType"] == "science"){
       int drillPWM = command["payload"]["drill"];
       drill(drillPWM);
       int elevPWM = command["payload"]["elev"];
