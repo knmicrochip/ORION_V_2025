@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include "arm_executor.h"
 //{"eventType": "manipulator", "mode": "pwm", "payload": {"rotate_turret": "100","flex_forearm": "100", "flex_arm":"100","flex_gripper": "100", "rotate_gripper": "100","end_effector":"100"}}
+//{"eventType": "manipulator", "mode": "pwm", "payload": {"rotate_turret": "0","flex_forearm": "0", "flex_arm":"0","flex_gripper": "180", "rotate_gripper": "180","end_effector":"180"}}
 //{"eventType": "manipulator", "mode": "pwm", "payload": {"rotate_turret": "-100","flex_forearm": "-100", "flex_arm":"-100","flex_gripper": "-100", "rotate_gripper": "-100","end_effector":"-100"}}
 //{"eventType": "manipulator", "mode": "pwm", "payload": {"rotate_turret": "0","flex_forearm": "0", "flex_arm":"0","flex_gripper": "0", "rotate_gripper": "0","end_effector":"0"}}
 StaticJsonDocument<400> json;
@@ -37,7 +38,7 @@ void loop() {
    
 
     const auto currentTime = millis();
-    if (currentTime - lastExecutionTime > 1000) {
+    if (currentTime - lastExecutionTime > 100) {
       
       runMotors();
       Serial.println("running motors");

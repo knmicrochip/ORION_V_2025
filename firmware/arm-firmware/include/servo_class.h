@@ -2,6 +2,7 @@
 #include "arm_defines.h"
 #include <Servo.h>
 #define AVERAGE 20
+#define DEBUG
 
 class ServoDriver
 {
@@ -30,6 +31,9 @@ class ServoDriver
     }
     void enable()
     {
+        //Serial.print(" enable on pin ");
+        //Serial.print(enablePin);
+        //Serial.print(" ");
         digitalWrite(enablePin, 1);
     }
 
@@ -39,6 +43,7 @@ class ServoDriver
     }
     void moveTo(int tempPosition, int tempStep)
     {
+        enable();
         if (tempPosition>180||tempPosition<0) error=2;
         target=tempPosition;
         step=abs(tempStep);
@@ -52,6 +57,12 @@ class ServoDriver
 
     int update()
     {
+         #ifdef DEBUG
+        char debug[100];
+        sprintf(debug, "servo %d target pos %d current pos %d current %d ",drivePin,position,target,0);
+        Serial.println(debug);
+        #endif
+
         if(target>=0)
         {   
             if(position<0) {position=0; step=0;}

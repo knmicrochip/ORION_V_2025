@@ -3,8 +3,8 @@
 #include <Servo.h>
 #define AVERAGE 20
 
-#define DEBUG
-
+//#define DEBUG
+#define MINPWM 100
 
 class MotorDriver
 {
@@ -38,7 +38,7 @@ class MotorDriver
     int setSpeed(int tempSpeed)
     {
         targetDir=tempSpeed>0 ? 1 : -1;
-        targetSpeed=map(tempSpeed,0,100,0,255);
+        targetSpeed=tempSpeed;
         Serial.print("setting speed ");
     }
 
@@ -80,7 +80,7 @@ class MotorDriver
 
         }
                                                                    
-    analogWrite(enablePin, abs(currentSpeed));         //update registers
+    analogWrite(enablePin, map(abs(currentSpeed),0,100,MINPWM,255));         //update registers
     if(currentSpeed>0) {digitalWrite(dirPin1,1);digitalWrite(dirPin2,0);}
     if(currentSpeed<0) {digitalWrite(dirPin1,0);digitalWrite(dirPin2,1);}
 

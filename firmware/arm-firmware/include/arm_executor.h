@@ -35,10 +35,10 @@ void executePWM(const StaticJsonDocument<CAPACITY>& doc)
     base.setSpeed(baseData);
     arm.setSpeed(armData);
     elbow.setSpeed(elbowData);
-    wrist.setSpeed(wristData);
-    rotate.setSpeed(rotateData);
+    wrist.moveTo(wristData,1);
+    rotate.moveTo(rotateData,1);
     gripper.setSpeed(gripperData);
-    shovel.setSpeed(shovelData);
+    shovel.moveTo(shovelData,1);
 }
 
 void runMotors()
