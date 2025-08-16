@@ -44,7 +44,7 @@ public class PwmModeStrategy implements DriveModeStrategy {
             // In-place rotation, negative PWM means rotating counter-clockwise
             // For left rotation (rotateZ < 0): left wheels backward, right wheels forward
             // For right rotation (rotateZ > 0): left wheels forward, right wheels backward
-            leftPwm = (short) (rotateZ * MAX_PWM);
+            leftPwm = (short) (-rotateZ * MAX_PWM);
             rightPwm = (short) (-rotateZ * MAX_PWM);
         } else {
             // Differential drive based on stick input, negative PWM means rotating counter-clockwise

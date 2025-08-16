@@ -30,19 +30,25 @@ def manipulator_pane(state: ManipulatorState, mqtt_client: MqttClient):
             
             def on_move(e):
                 if not state.gamepad_active:
-                    if func_name in ['rotate_turret', 'rotate_gripper']:
-                        value = e.x
-                    elif func_name in ['flex_forearm', 'flex_arm', 'flex_gripper', 'grip']:
-                        value = -1 * e.y
+                    current_joint, _, _ = str(func_name).partition('(')
+                    current_joint = current_joint.rstrip()
+                    logger.info("Logger {}".format(current_joint))
+                    if current_joint in ['rotate_turret', 'rotate_gripper']:
+                        value = float(e.x)
+                    elif current_joint in ['flex_forearm', 'flex_arm', 'flex_gripper', 'grip']:
+                        value = float(-1.0 * e.y)
+
                     else:
-                        value = 0
-                    
-                    setattr(state, func_name, max(-1.0, min(1.0, value)))
+                        value = float(0)
+                        
+                    setattr(state, current_joint, max(-1.0, min(1.0, value)))
                     send_manipulator_data()
 
             def on_end(e):
                 if not state.gamepad_active:
-                    setattr(state, func_name, 0.0)
+                    current_joint, _, _ = str(func_name).partition('(')
+                    current_joint = current_joint.rstrip()
+                    setattr(state, current_joint, 0.0)
                     send_manipulator_data()
 
             ui.joystick(on_move=on_move, on_end=on_end).classes('w-32 h-32 bg-[#f7a623] opacity-80 rounded-full border-2 border-black')

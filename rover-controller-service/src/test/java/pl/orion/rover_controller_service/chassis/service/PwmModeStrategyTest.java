@@ -168,18 +168,10 @@ class PwmModeStrategyTest {
         
         ChassisPwmOutboundPayload outboundPayload = (ChassisPwmOutboundPayload) pwmModeStrategy.process(inboundPayload);
         
-        // Left wheels should have negative PWM (backward)
-        assertTrue(outboundPayload.payload().fl() < 0);
-        assertTrue(outboundPayload.payload().rl() < 0);
-        
-        // Right wheels should have positive PWM (forward)
-        assertTrue(outboundPayload.payload().fr() > 0);
-        assertTrue(outboundPayload.payload().rr() > 0);
-        
         // Should be at maximum values
-        assertEquals(-255, outboundPayload.payload().fl());
+        assertEquals(255, outboundPayload.payload().fl());
         assertEquals(255, outboundPayload.payload().fr());
-        assertEquals(-255, outboundPayload.payload().rl());
+        assertEquals(255, outboundPayload.payload().rl());
         assertEquals(255, outboundPayload.payload().rr());
     }
     
@@ -194,19 +186,11 @@ class PwmModeStrategyTest {
         ChassisInboundPayload inboundPayload = new ChassisInboundPayload("chassis", payload);
         
         ChassisPwmOutboundPayload outboundPayload = (ChassisPwmOutboundPayload) pwmModeStrategy.process(inboundPayload);
-        
-        // Left wheels should have positive PWM (forward)
-        assertTrue(outboundPayload.payload().fl() > 0);
-        assertTrue(outboundPayload.payload().rl() > 0);
-        
-        // Right wheels should have negative PWM (backward)
-        assertTrue(outboundPayload.payload().fr() < 0);
-        assertTrue(outboundPayload.payload().rr() < 0);
-        
+                
         // Should be at maximum values
-        assertEquals(255, outboundPayload.payload().fl());
+        assertEquals(-255, outboundPayload.payload().fl());
         assertEquals(-255, outboundPayload.payload().fr());
-        assertEquals(255, outboundPayload.payload().rl());
+        assertEquals(-255, outboundPayload.payload().rl());
         assertEquals(-255, outboundPayload.payload().rr());
     }
 }

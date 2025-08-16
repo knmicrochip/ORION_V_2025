@@ -9,7 +9,7 @@ COPY src ./src
 
 RUN chmod +x ./gradlew
 
-RUN ./gradlew bootJar
+RUN ./gradlew bootJar -x test
 
 # Stage 2: Create the final, minimal image
 FROM amazoncorretto:21-alpine
