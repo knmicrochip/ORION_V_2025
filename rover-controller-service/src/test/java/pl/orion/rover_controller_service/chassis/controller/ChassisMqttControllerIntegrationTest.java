@@ -72,7 +72,7 @@ class ChassisMqttControllerIntegrationTest {
 
         final Mqtt5AsyncClient client = this.mqttClient.getMqttClient();
         double[] stick = {0.0, 0.0};
-        double[] rotate = {-1.0};   // Simulating a left rotation
+        double[] rotate = {-1.0};   // Simulating a counter clockwise in-place rotation
         final var payload = 
             new ChassisInboundPayload.ChassisPayload(stick, false, false, false, false, rotate);
         final var inboundPayload = new ChassisInboundPayload("chassis", payload);
@@ -92,8 +92,8 @@ class ChassisMqttControllerIntegrationTest {
         assertEquals("Should receive only one message, no other message left in the queue", 0, receivedMessages.size());
         
         final var outPayload = receivedPayload.payload();
-        assertEquals("Front left motor speed should be -255", -255, outPayload.fl());
-        assertEquals("Rear left motor speed should be -255", -255, outPayload.rl());
+        assertEquals("Front left motor speed should be -255", 255, outPayload.fl());
+        assertEquals("Rear left motor speed should be -255", 255, outPayload.rl());
         assertEquals("Front right motor speed should be 255", 255, outPayload.fr());
         assertEquals("Rear right motor speed should be 255", 255, outPayload.rr());
     }
