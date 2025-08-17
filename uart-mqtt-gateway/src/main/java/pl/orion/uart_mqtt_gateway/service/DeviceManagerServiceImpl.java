@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +26,12 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     private final UartMqttGatewayProperties properties;
     private final MqttService mqttService;
     private final Map<String, DeviceHandler> managedDevices = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService periodic = Executors.newSingleThreadScheduledExecutor();
+
+    public void init() {
+        log.info("Initiating period UART device scanning");
+        periodic.scheduleAtFixedRate(this::scan, 5000, 2500, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
 
     @Override
     public void stop() {
@@ -31,7 +39,6 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     }
 
     @Override
-    @Scheduled(fixedRateString = "1000", initialDelayString = "1000")
     public void scan() {
         log.debug("Scanning for serial devices...");
         try {
