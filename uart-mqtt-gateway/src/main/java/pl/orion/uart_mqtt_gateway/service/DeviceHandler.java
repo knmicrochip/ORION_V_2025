@@ -2,6 +2,7 @@ package pl.orion.uart_mqtt_gateway.service;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,11 +17,11 @@ import pl.orion.uart_mqtt_gateway.config.UartMqttGatewayProperties;
 @RequiredArgsConstructor
 @Slf4j
 public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListener {
-
     private final SerialPort serialPort;
     private final UartMqttGatewayProperties properties;
     private final MqttService mqttService;
-    
+
+    private AtomicBoolean connected = new AtomicBoolean(false);
     private CompletableFuture<String> eventType = new CompletableFuture<>();
     private UartMqttGatewayProperties.UartMqttMapping.MqttMapping mqttTopics = null;
 
@@ -31,12 +32,14 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
         serialPort.setParity(properties.getSerial().getParityBit());
         serialPort.openPort();
         serialPort.addDataListener(this);
+        connected.set(true);
     }
 
     public void stop() {
         mqttService.unsubscribe(mqttTopics.getInbound());
         serialPort.removeDataListener();
         serialPort.closePort();
+        connected.set(false);
     }
 
     @Override
@@ -49,6 +52,10 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
     public int getListeningEvents() {
         return SerialPort.LISTENING_EVENT_DATA_RECEIVED
                 | SerialPort.LISTENING_EVENT_PORT_DISCONNECTED;
+    }
+
+    public boolean isConnected() {
+        return connected.get();
     }
 
     public CompletableFuture<String> getEventType() {
@@ -93,7 +100,7 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
 
         if (mqttTopics != null) {
             mqttService.publish(mqttTopics.getOutbound(), new String(data));
-        } 
+        }
     }
 
     private boolean identifyEventType(byte[] data) {
@@ -109,6 +116,7 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
                         .orElseThrow(() -> new IllegalArgumentException("No mapping found for event type: " + eventTypeString));
                     eventType.complete(eventTypeString);
                     mqttService.subscribe(mqttTopics.getInbound(), this);
+                    connected.set(true);
                     log.info("Event type detected: {} under port: {}", eventTypeString, serialPort.getSystemPortName());
                 }
             } catch (IOException e) {

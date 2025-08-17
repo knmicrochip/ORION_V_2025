@@ -14,7 +14,7 @@ uart-mqtt-gateway:
         reconnect.delay.ms: 5000
 
   serial:
-      scan-interval-ms: 1000
+      scan-interval-ms: 5000
       delimiter: "\n\n"
       allowed-port-name-prefixes: 
         - /dev/ttyUSB
