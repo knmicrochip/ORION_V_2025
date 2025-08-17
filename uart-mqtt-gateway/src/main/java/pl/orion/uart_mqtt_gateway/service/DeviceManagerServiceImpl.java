@@ -13,8 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,37 +31,43 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     }
 
     @Override
-    @Scheduled(fixedRateString = "${uart-mqtt-gateway.serial.scan-interval-ms}", initialDelayString = "${uart-mqtt-gateway.serial.scan-interval-ms}")
+    @Scheduled(fixedRateString = "1000", initialDelayString = "1000")
     public void scan() {
         log.debug("Scanning for serial devices...");
-        List<SerialPort> availablePorts = Arrays.asList(SerialPort.getCommPorts()).stream()
-        .filter(port -> 
-                        properties.getSerial().getAllowedPortNamePrefixes().stream()
-                            .anyMatch(prefix -> port.getSystemPortPath().startsWith(prefix))
-        )
-        .collect(Collectors.toList());
+        try {
+            List<SerialPort> availablePorts = Arrays.asList(SerialPort.getCommPorts()).stream()
+            .filter(port -> 
+                            properties.getSerial().getAllowedPortNamePrefixes().stream()
+                                .anyMatch(prefix -> port.getSystemPortPath().startsWith(prefix))
+            )
+            .collect(Collectors.toList());
 
-        // Add new devices
-        for (SerialPort port : availablePorts) {
-            if (!managedDevices.containsKey(port.getSystemPortName())) {
-                    DeviceHandler handler = new DeviceHandler(port, properties, mqttService);
-                    handler.start();
-                    String eventType = handler.getEventType().join();
-                    log.info("Started handling device: {} with event type: {}", port.getSystemPortName(), eventType);
-                    managedDevices.put(port.getSystemPortName(), handler);
-                }
+            // Add new devices
+            for (SerialPort port : availablePorts) {
+                if (!managedDevices.containsKey(port.getSystemPortName())) {
+                        DeviceHandler handler = new DeviceHandler(port, properties, mqttService);
+                        handler.start();
+                        String eventType = handler.getEventType().join();
+                        log.info("Started handling device: {} with event type: {}", port.getSystemPortName(), eventType);
+                        managedDevices.put(port.getSystemPortName(), handler);
+                    }
+            }
+
+            // Remove disconnected devices
+            List<String> availablePortNames = availablePorts.stream()
+                .collect(Collectors.mapping(SerialPort::getSystemPortName, Collectors.toList()));
+
+            managedDevices.keySet().stream()
+                    .filter(portName -> !availablePortNames.contains(portName))
+                    .forEach(portName -> {
+                        DeviceHandler handler = managedDevices.remove(portName);
+                        handler.stop();
+                        log.info("Stopped handling device: {}", portName);
+                    });
+        
+            }
+            catch (Exception e) {
+                log.error("Cannot perform scan because of exception {}", e);
         }
-
-        // Remove disconnected devices
-        List<String> availablePortNames = availablePorts.stream()
-            .collect(Collectors.mapping(SerialPort::getSystemPortName, Collectors.toList()));
-
-        managedDevices.keySet().stream()
-                .filter(portName -> !availablePortNames.contains(portName))
-                .forEach(portName -> {
-                    DeviceHandler handler = managedDevices.remove(portName);
-                    handler.stop();
-                    log.info("Stopped handling device: {}", portName);
-                });
     }
 }
