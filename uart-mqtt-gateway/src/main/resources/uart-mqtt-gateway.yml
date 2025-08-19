@@ -4,7 +4,7 @@ uart-mqtt-gateway:
   mqtt:
       client-id: uart-mqtt-gateway
       broker:
-        url: localhost
+        url: 127.0.0.1
         port: 1883
         username: ${MQTT_USERNAME}
         password: ${MQTT_PASSWORD}
@@ -15,6 +15,7 @@ uart-mqtt-gateway:
 
   serial:
       scan-interval-ms: 5000
+      remove-disconnected-interval-ms: 10000
       delimiter: "\n\n"
       allowed-port-name-prefixes: 
         - /dev/ttyUSB

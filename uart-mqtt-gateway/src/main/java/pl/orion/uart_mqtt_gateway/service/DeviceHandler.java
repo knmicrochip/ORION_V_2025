@@ -2,7 +2,9 @@ package pl.orion.uart_mqtt_gateway.service;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +23,8 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
     private final UartMqttGatewayProperties properties;
     private final MqttService mqttService;
 
-    private AtomicBoolean connected = new AtomicBoolean(false);
+    private final AtomicLong lastSerialMsgReceivedTimestamp = new AtomicLong(TimeService.getCurrentTimeMillis());
+    private DeviceConnState state = DeviceConnState.UNKNOWN;
     private CompletableFuture<String> eventType = new CompletableFuture<>();
     private UartMqttGatewayProperties.UartMqttMapping.MqttMapping mqttTopics = null;
 
@@ -32,14 +35,19 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
         serialPort.setParity(properties.getSerial().getParityBit());
         serialPort.openPort();
         serialPort.addDataListener(this);
-        connected.set(true);
+        this.state = DeviceConnState.IDENTIFYING;
+        this.lastSerialMsgReceivedTimestamp.set(TimeService.getCurrentTimeMillis());
     }
 
     public void stop() {
-        mqttService.unsubscribe(mqttTopics.getInbound());
-        serialPort.removeDataListener();
-        serialPort.closePort();
-        connected.set(false);
+        if (this.state != DeviceConnState.DISCONNECTED) {
+            if (mqttTopics != null) {
+                mqttService.unsubscribe(mqttTopics.getInbound());
+            }
+            serialPort.removeDataListener();
+            serialPort.closePort();
+            this.state = DeviceConnState.DISCONNECTED;
+        }
     }
 
     @Override
@@ -54,12 +62,20 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
                 | SerialPort.LISTENING_EVENT_PORT_DISCONNECTED;
     }
 
-    public boolean isConnected() {
-        return connected.get();
-    }
-
     public CompletableFuture<String> getEventType() {
         return eventType;
+    }
+
+    public String getSystemPortPath() {
+        return serialPort.getSystemPortPath();
+    }
+
+    public Long getLastSerialMsgReceivedTimestamp() {
+        return lastSerialMsgReceivedTimestamp.get();
+    }
+
+    public DeviceConnState getState() {
+        return state;
     }
 
     @Override
@@ -74,6 +90,8 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
 
     @Override
     public void serialEvent(SerialPortEvent event) {
+        this.lastSerialMsgReceivedTimestamp.set(TimeService.getCurrentTimeMillis());
+
         switch (event.getEventType()) {
             case SerialPort.LISTENING_EVENT_DATA_RECEIVED:
                 processSerialData(event.getReceivedData());
@@ -114,13 +132,15 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
                         .findFirst()
                         .map(UartMqttGatewayProperties.UartMqttMapping::getMqtt)
                         .orElseThrow(() -> new IllegalArgumentException("No mapping found for event type: " + eventTypeString));
+
                     eventType.complete(eventTypeString);
+                    this.state = DeviceConnState.CONNECTED;
+
                     mqttService.subscribe(mqttTopics.getInbound(), this);
-                    connected.set(true);
-                    log.info("Event type detected: {} under port: {}", eventTypeString, serialPort.getSystemPortName());
+                    log.info("[Device={}] Detected eventType=[{}], applying MQTT topic mapping: {}", getSystemPortPath(), eventTypeString, mqttTopics); 
                 }
             } catch (IOException e) {
-                log.warn("Failed to parse serial data as JSON", e);
+                log.trace("[Device={}] Failed to parse incoming JSON payload: {}", getSystemPortPath(), e.toString());
                 return false;
             }
         }

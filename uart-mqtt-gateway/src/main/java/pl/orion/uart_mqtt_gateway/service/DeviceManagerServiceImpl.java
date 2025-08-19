@@ -3,9 +3,11 @@ package pl.orion.uart_mqtt_gateway.service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,13 +26,13 @@ import pl.orion.uart_mqtt_gateway.config.UartMqttGatewayProperties;
 public class DeviceManagerServiceImpl implements DeviceManagerService {
 
     private static final int SERIAL_EVENT_TYPE_CONNECTION_INTERVAL_MS = 2000;
-    private static final int MAX_DETECTION_ATTEMPTS = 5;
+    private static final int LIVENESS_TIMEOUT_THRESHOLD_MS = 15000;
 
     private final UartMqttGatewayProperties properties;
     private final MqttService mqttService;
-    private final Map<String, DeviceHandler> managedDevices = new ConcurrentHashMap<>();
-    private final Map<String, DeviceHandler> connectionPendingDevices = new ConcurrentHashMap<>();
-    private final Map<String, Integer> blacklistedDevices = new ConcurrentHashMap<>();
+
+    private Map<String, DeviceHandler> managedDevices = new ConcurrentHashMap<>(5);
+
 
     @Override
     public void stop() {
@@ -42,15 +44,54 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     public void scan() {
         List<SerialPort> availablePorts = getAllAvailablePorts();
         final var unconnectedPorts = availablePorts.stream()
-            .filter(port -> !managedDevices.containsKey(port.getSystemPortName()))
+            .filter(port -> !managedDevices.containsKey(port.getSystemPortPath()))
             .toList();
 
-        log.info("Scanning for UART devices. Available ports={}, ports not yet connected={}", availablePorts, unconnectedPorts);
-        for (SerialPort port : unconnectedPorts) {
-            detectAndProcessDevice(port);
-        }
+        log.info("Scanning for UART devices... Pending connection={}, connected={}", 
+            unconnectedPorts.stream().map(SerialPort::getSystemPortPath).toList(), managedDevices.keySet());
 
-        removeDisconnectedDevices(availablePorts);
+        final var unidentifiedUnconnectedDevices = unconnectedPorts.stream()
+            .map(this::startDeviceIdentification);
+        final var identificationPendingDevices = Stream.concat(
+                unidentifiedUnconnectedDevices,
+                managedDevices.values().stream()
+                    .filter(device -> device.getState() == DeviceConnState.IDENTIFYING)
+            )
+            .toList();
+
+        for (DeviceHandler device : identificationPendingDevices) {
+            managedDevices.put(device.getSystemPortPath(), device);
+
+            try {
+                final String eventType = device.getEventType().get(SERIAL_EVENT_TYPE_CONNECTION_INTERVAL_MS, TimeUnit.MILLISECONDS);
+                log.info("Device [{}] has been identified as [{}]", device.getSystemPortPath(), eventType);
+            }
+            catch (Exception e) {
+                log.error("Device [{}]. Cannot identify device under port. Reason: {}", device.getSystemPortPath(), e.toString());
+            }
+        }
+    }
+
+    @Scheduled(fixedRateString = "${uart-mqtt-gateway.serial.remove-disconnected-interval-ms}", initialDelayString = "${uart-mqtt-gateway.serial.remove-disconnected-interval-ms}")
+    public void removeDisconnectedDevices() {
+        for (Entry<String, DeviceHandler> entry : managedDevices.entrySet()) {
+            final var device = entry.getValue();
+            if (device.getState() == DeviceConnState.DISCONNECTED
+                    || !isDeviceAlive(device)) {
+                        device.stop();
+                        managedDevices.remove(entry.getKey());
+                        log.info("[Device={}] has been removed as no longer active", entry.getKey());
+                    }
+        }
+    }
+
+    private boolean isDeviceAlive(DeviceHandler device) {
+        final var now = TimeService.getCurrentTimeMillis();
+        final var lastSerialMsgReceivedTimestamp = device.getLastSerialMsgReceivedTimestamp();
+        final var diff = now - lastSerialMsgReceivedTimestamp;
+
+        log.trace("[Device={}] Last serial message received timestamp [{}], now [{}], diff [{}] return result={}", device.getSystemPortPath(), lastSerialMsgReceivedTimestamp, now, diff, diff < LIVENESS_TIMEOUT_THRESHOLD_MS);
+        return diff < LIVENESS_TIMEOUT_THRESHOLD_MS;
     }
 
     private List<SerialPort> getAllAvailablePorts() {
@@ -59,54 +100,13 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
                     properties.getSerial().getAllowedPortNamePrefixes().stream()
                         .anyMatch(prefix -> port.getSystemPortPath().startsWith(prefix))
             )
-            .filter(port -> !isPortBlacklisted(port))
             .collect(Collectors.toList());
         return availablePorts;
     }
 
-    private void detectAndProcessDevice(SerialPort port) {
-        DeviceHandler handler;
-        if (connectionPendingDevices.containsKey(port.getSystemPortName())) {
-            handler = connectionPendingDevices.get(port.getSystemPortName());
-        }
-        else {
-            handler = new DeviceHandler(port, properties, mqttService);
-            handler.start();
-            connectionPendingDevices.put(port.getSystemPortName(), handler);
-        }
-
-        try {
-            String eventType = handler.getEventType().get(SERIAL_EVENT_TYPE_CONNECTION_INTERVAL_MS, TimeUnit.MILLISECONDS);
-            managedDevices.put(port.getSystemPortName(), handler);
-            connectionPendingDevices.remove(port.getSystemPortName());
-            log.info("Started handling device: {} with event type: {}", port.getSystemPortName(), eventType);
-        } catch (Exception e) {
-            log.warn("Failed to get event type for device: {}", port.getSystemPortName());
-            int detectionAttempt = blacklistedDevices.getOrDefault(port.getSystemPortName(), 0);
-            detectionAttempt++;
-            blacklistedDevices.put(port.getSystemPortName(), detectionAttempt);
-            if (isPortBlacklisted(port)) {
-                log.info("Port {} has been blacklisted - no further connection attempts", port.getSystemPortName());
-            }
-        }
+    private DeviceHandler startDeviceIdentification(SerialPort port) {
+        DeviceHandler handler = new DeviceHandler(port, properties, mqttService);
+        handler.start();
+        return handler;
     }
-
-    private boolean isPortBlacklisted(SerialPort port) {
-        return !(blacklistedDevices.getOrDefault(port.getSystemPortName(), 0) < MAX_DETECTION_ATTEMPTS);
-    }
-
-    private void removeDisconnectedDevices(List<SerialPort> availablePorts) {
-        managedDevices.entrySet().stream()
-                .filter(kv -> !kv.getValue().isConnected())
-                .forEach(kv -> {
-                    DeviceHandler handler = managedDevices.remove(kv.getKey());
-
-                    if (blacklistedDevices.containsKey(kv.getKey())) {
-                        blacklistedDevices.remove(kv.getKey());
-                    }
-                    handler.stop();
-                    log.info("Stopped handling device and evicted it from memory: {}", kv.getKey());
-                });
-    }
-
 }

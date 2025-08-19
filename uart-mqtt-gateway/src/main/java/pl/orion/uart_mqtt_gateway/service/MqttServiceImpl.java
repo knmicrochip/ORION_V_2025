@@ -21,6 +21,8 @@ public class MqttServiceImpl implements MqttService {
 
     @Override
     public void connect() {
+        log.info("Attempting to connect to MQTT broker under URL={}@{}:{}", properties.getMqtt().getBrokerUsername(), properties.getMqtt().getBrokerUrl(), properties.getMqtt().getBrokerPort());
+
         client = MqttClient.builder()
                 .useMqttVersion5()
                 .automaticReconnect()
@@ -44,7 +46,7 @@ public class MqttServiceImpl implements MqttService {
                     } else {
                         log.info("Connected to MQTT broker");
                     }
-                });
+                }).join();
     }
 
     @Override
