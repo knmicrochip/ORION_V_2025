@@ -61,8 +61,10 @@ def switch_pane(pane_name: str):
             manipulator_state.telemetry_callback = lambda topic, payload: telemetry_content.refresh('Manipulator', payload)
             mqtt_client.subscribe(manipulator_state.active_topic, manipulator_state.telemetry_callback)
         elif pane_name == 'science':
-            science_pane()
-            telemetry_content.refresh('Science')
+           science_pane(science_state, mqtt_client)
+            science_state.active_topic = MQTT_TOPICS['science_output']
+            science_state.telemetry_callback = lambda topic, payload: telemetry_content.refresh('Science', payload)
+            mqtt_client.subscribe(science_state.active_topic, science_state.telemetry_callback)
     menu_content.refresh(pane_name) # Refresh the menu to highlight the active pane
 
 # Main UI Layout
