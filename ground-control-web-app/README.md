@@ -87,7 +87,7 @@ To run the application in development mode:
 uv run main.py
 ```
 
-The application will be accessible at `http://localhost:8080`.
+The application will be accessible at `http://localhost` (default port: 80).
 
 If you don't see your changes, it might be useful to clear all environment cache:
 
@@ -107,10 +107,10 @@ To build and run the application using Docker:
 
 2.  **Run the Docker container:**
     ```bash
-    docker run -d --name ground-control-app --net host ground-control-web-app
+    docker run -d --rm --name ground-control-app -p80:8080 ground-control-web-app
     ```
 
-    The application will be accessible via your host machine's network, typically at `http://localhost:8080`.
+    The application will be accessible via your host machine's network, typically at `http://localhost` (default port: 80).
 
 ## Usage
 

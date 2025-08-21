@@ -80,6 +80,8 @@ To stop the running MQTT broker:
 ./launcher.sh down
 ```
 
+Your web application (Ground Control Web App) shall be accessible under `http://localhost` (default port: `80`).
+
 **2. Launching Other Services**
 
 The other services (Ground Control Web App, Rover Controller Service, UART-MQTT Gateway) are launched independently. Please refer to their respective `README.md` files for detailed instructions on how to build and run them.

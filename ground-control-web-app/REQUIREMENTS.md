@@ -70,7 +70,7 @@ the input provided by the panes are ignored.
 5. The USB controllers are mapped in a way to correspond the UI widgets.
 Refer to 'Business logic' section for detailed mapping
 
-6. The USB controllers shall be probed at frequency of 50Hz. This value shall 
+6. The USB controllers shall be probed at frequency of 20Hz. This value shall 
 be easily configurable
 
 ## Pane Designs
