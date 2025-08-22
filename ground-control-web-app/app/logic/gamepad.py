@@ -48,7 +48,7 @@ def process_gamepad_data(event, chassis_state: ChassisState, manipulator_state: 
             if 'logitech extreme 3d' in gamepad_id:
                 chassis_state.gamepad_active = True
                 process_chassis_gamepad(gamepad, chassis_state, mqtt_client)
-            elif 'xbox' in gamepad_id or 'microsoft' in gamepad_id:
+            elif 'xbox' in gamepad_id or 'microsoft' in gamepad_id or 'rumblepad':
                 manipulator_state.gamepad_active = True
                 process_manipulator_gamepad(gamepad, manipulator_state, mqtt_client)
 
