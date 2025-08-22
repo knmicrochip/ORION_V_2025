@@ -60,12 +60,10 @@ class ManipulatorState:
   
 class ScienceState:
     def __init__(self):
-        self.button_0 = False
-        self.button_1 = False
-        self.button_2 = False
-        self.button_3 = False
-        self.button_4 = False
-        self.button_5 = False
+        self.start = False
+        self.conveyor = 2
+        self.elevator = 0.0
+        self.drill = 0
         self.gamepad_active = False
         self.active_topic = None
         self.telemetry_callback = None
@@ -74,11 +72,9 @@ class ScienceState:
         return {
             "eventType": "science",
             "payload": {
-                "button_0": self.button_0,
-                "button_1": self.button_1,
-                "button_2": self.button_2,
-                "button_3": self.button_3,
-                "button_4": self.button_4,
-                "button_5": self.button_5,
+                "start": self.start,
+                "conveyor": self.conveyor,
+                "elevator": self.elevator,
+                "drill": self.drill
             }
         }
