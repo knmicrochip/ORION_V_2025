@@ -116,9 +116,9 @@ const int laserOn = 8;
 
 void measureGas(struct sample *sample){
   digitalWrite(MQon,HIGH);
-  delay(45000);
+  delay(1000);
   analogWrite(laserOn,255);
-  delay(10000);
+  delay(1000);
   analogWrite(laserOn,0);
   sample->gasses[0] = analogRead(MQ2)*0.00538;
   sample->gasses[1] = analogRead(MQ4)*0.00538;
@@ -287,6 +287,8 @@ void setup() {
   sample5.number = 5;
   sample6.number = 6;
 
+  digitalWrite(9,HIGH);
+
   Serial.begin(115200);
   while(!Serial);
   Wire.begin(); //Join I2C bus
@@ -384,6 +386,19 @@ void loop() {
       elev(elevPWM);
       int conv = command["payload"]["conv"];
       conveyor(conv);
+      int rotate = command["payload"]["rotate"];
+      drumStepper.step(rotate);
+      int reset = command["payload"]["reset"];
+      if(reset){
+        //calibrate drum
+        if(digitalRead(opto1) == 0){
+        while(digitalRead(opto1) == 0){
+          drumStepper.step(1);
+        }
+        drumStepper.step(150);
+        currSample = 0;
+       } 
+      }
 
       if(command["payload"]["res_seq"] == 1){
         if(currSample < 6){
