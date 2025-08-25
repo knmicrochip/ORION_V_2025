@@ -19,7 +19,7 @@ uart-mqtt-gateway:
       delimiter: "\n\n"
       allowed-port-name-prefixes: 
         - /dev/ttyUSB
-        - /dev/ttyACM
+        - regex:/dev/ttyACM[0-9]
       baud-rate: 115200
       data-bits: 8
       stop-bits: 1

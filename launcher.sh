@@ -8,6 +8,8 @@ export IP_ADDRESS_OF_HOST_PC_IN_LOCAL_NETWORK=$(hostname -I | awk '{print $1}')
 export MQTT_USERNAME=user
 export MQTT_PASSWORD=user
 
+export UART_MQTT_GATEWAY_SERIAL_ALLOWED_PORT_NAME_PREFIXES="/dev/ttyUSB,regex:/dev/ttyACM[3-9]"
+
 
 # --- Functions ---
 print_manual() {

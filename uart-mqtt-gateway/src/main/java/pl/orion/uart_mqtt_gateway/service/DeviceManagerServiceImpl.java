@@ -100,6 +100,11 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
         log.info("[Device={}, eventType={}] has been removed on disconnect.", portPath, removedDevice.getEventType().getNow("unknown"));
     }
 
+    private DeviceHandler startDeviceIdentification(SerialPort port) {
+        DeviceHandler handler = new DeviceHandler(port, properties, mqttService, this::removeDevice);
+        handler.start();
+        return handler;
+    }
 
     private boolean isDeviceAlive(DeviceHandler device) {
         final var now = TimeService.getCurrentTimeMillis();
@@ -112,17 +117,24 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 
     private List<SerialPort> getAllAvailablePorts() {
         List<SerialPort> availablePorts = Arrays.asList(SerialPort.getCommPorts()).stream()
-            .filter(port -> 
-                    properties.getSerial().getAllowedPortNamePrefixes().stream()
-                        .anyMatch(prefix -> port.getSystemPortPath().startsWith(prefix))
+            .filter(port -> properties.getSerial().getAllowedPortNamePrefixes().stream()
+                    .anyMatch(prefix -> isPortPathAllowed(port, prefix))
             )
             .collect(Collectors.toList());
         return availablePorts;
     }
 
-    private DeviceHandler startDeviceIdentification(SerialPort port) {
-        DeviceHandler handler = new DeviceHandler(port, properties, mqttService, this::removeDevice);
-        handler.start();
-        return handler;
+    boolean isPortPathAllowed(SerialPort port, String prefix) {
+        final var portPath = port.getSystemPortPath();
+        return portPath.startsWith(prefix)
+            || regexMatch(portPath, prefix);
+    }
+
+    static boolean regexMatch(String port, String prefix) {
+        if (!prefix.startsWith("regex:")) {
+            return false;
+        }
+        final var regex = prefix.replace("regex:", "");
+        return port.matches(regex);
     }
 }

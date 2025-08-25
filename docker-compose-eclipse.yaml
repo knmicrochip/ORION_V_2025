@@ -23,28 +23,28 @@ services:
       - orion-network
 
   # uart-mqtt-gateway service
-  uart-mqtt-gateway:
-    build: ./uart-mqtt-gateway
-    container_name: uart-mqtt-gateway
-    mem_limit: 256m
-    mem_reservation: 256m
-    user: "root:root"   # A bit dangerous, but needed for serial port access for now
-    privileged: true
-    restart: unless-stopped
-    labels:
-      - "autoheal=true"
-    volumes:
-      - /dev:/dev
-    environment:
-      - MQTT_USERNAME=${MQTT_USERNAME:-user}
-      - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
-      - UART_MQTT_GATEWAY_MQTT_BROKER_URL=mqtt5
-    depends_on:
-      - mqtt5
-    ports:
-      - "8088:8088"
-    networks:
-      - orion-network
+  # uart-mqtt-gateway:
+  #   build: ./uart-mqtt-gateway
+  #   container_name: uart-mqtt-gateway
+  #   mem_limit: 256m
+  #   mem_reservation: 256m
+  #   user: "root:root"   # A bit dangerous, but needed for serial port access for now
+  #   privileged: true
+  #   restart: unless-stopped
+  #   labels:
+  #     - "autoheal=true"
+  #   volumes:
+  #     - /dev:/dev
+  #   environment:
+  #     - MQTT_USERNAME=${MQTT_USERNAME:-user}
+  #     - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
+  #     - UART_MQTT_GATEWAY_MQTT_BROKER_URL=mqtt5
+  #   depends_on:
+  #     - mqtt5
+  #   ports:
+  #     - "8088:8088"
+  #   networks:
+  #     - orion-network
 
   # rover-controller-service service
   rover-controller-service:
