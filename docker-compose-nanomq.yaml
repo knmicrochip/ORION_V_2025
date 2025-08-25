@@ -28,6 +28,8 @@ services:
     restart: unless-stopped
     volumes:
       - /dev:/dev
+    labels:
+      - "autoheal=true"
     environment:
       - MQTT_USERNAME=${MQTT_USERNAME:-user}
       - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
@@ -75,6 +77,20 @@ services:
       - "80:8080"
     networks:
       - orion-network
+
+  autoheal:
+    image: willfarrell/autoheal
+    container_name: autoheal
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=1   # check every 5 seconds
+      - AUTOHEAL_START_PERIOD=10
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=10   # Docker waits max 10 seconds (the Docker default) for a container to stop before killing during restarts (container overridable via label, see below)
+      - DOCKER_SOCK=/var/run/docker.sock   # Unix socket for curl requests to Docker API
+      - CURL_TIMEOUT=15     # --max-time seconds for curl requests to Docker API
 
 networks:
   orion-network:
