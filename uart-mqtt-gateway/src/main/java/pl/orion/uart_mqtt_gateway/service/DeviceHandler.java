@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,11 +23,13 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
     private final SerialPort serialPort;
     private final UartMqttGatewayProperties properties;
     private final MqttService mqttService;
+    private final Consumer<String> disconnectedHook;
 
     private final AtomicLong lastSerialMsgReceivedTimestamp = new AtomicLong(TimeService.getCurrentTimeMillis());
     private DeviceConnState state = DeviceConnState.UNKNOWN;
     private CompletableFuture<String> eventType = new CompletableFuture<>();
     private UartMqttGatewayProperties.UartMqttMapping.MqttMapping mqttTopics = null;
+
 
     public void start() {
         serialPort.setBaudRate(properties.getSerial().getBaudRate()); // Example baud rate, can be configured
@@ -40,6 +43,8 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
     }
 
     public void stop() {
+        final var portpath = serialPort.getSystemPortPath();
+
         if (this.state != DeviceConnState.DISCONNECTED) {
             if (mqttTopics != null) {
                 mqttService.unsubscribe(mqttTopics.getInbound());
@@ -47,12 +52,13 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
             serialPort.removeDataListener();
             serialPort.closePort();
             this.state = DeviceConnState.DISCONNECTED;
+            disconnectedHook.accept(portpath);
         }
     }
 
     @Override
     public void handleMessage(String topic, String payload) {
-        log.debug("Received MQTT message on topic {}: {}", topic, payload);
+        log.trace("Received MQTT message on topic {}: {}", topic, payload);
         serialPort.writeBytes(payload.getBytes(), payload.length());
     }
 
@@ -97,7 +103,7 @@ public class DeviceHandler implements MqttMessageHandler, SerialPortMessageListe
                 processSerialData(event.getReceivedData());
                 break;
             case SerialPort.LISTENING_EVENT_PORT_DISCONNECTED:
-                log.info("Serial port {} disconnected", serialPort.getSystemPortPath());
+                log.info("[Device={}, eventType={}] Device disconnected", serialPort.getSystemPortPath(), eventType.getNow("unknown"));
                 stop();
                 break;
             default:

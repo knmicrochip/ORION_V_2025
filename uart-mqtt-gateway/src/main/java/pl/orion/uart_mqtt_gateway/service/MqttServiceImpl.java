@@ -3,6 +3,8 @@ package pl.orion.uart_mqtt_gateway.service;
 import com.hivemq.client.mqtt.MqttClient;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
+
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,7 @@ public class MqttServiceImpl implements MqttService {
                 }).join();
     }
 
+    @PreDestroy
     @Override
     public void disconnect() {
         client.disconnect();

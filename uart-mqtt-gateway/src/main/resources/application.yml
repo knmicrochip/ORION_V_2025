@@ -14,3 +14,12 @@ logging:
 
 server:
   port: 8088
+
+management:
+  endpoint:
+    shutdown:
+      access: unrestricted
+  endpoints:
+    web:
+      exposure:
+        include: health, shutdown
