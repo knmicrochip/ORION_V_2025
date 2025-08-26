@@ -32,41 +32,62 @@
 
 #define PWM_MAXVAL 100
 
+
+
 void runBTS(int pwm, int pinForward, int pinBackward, volatile uint16_t* regForward, volatile uint16_t* regBackward)
 {
     
-    int pwmTarget=abs(pwm);                                                     //absolute power value
+    int pwmTarget=pwm;                                                     //absolute power value
     int dirTarget=pwm>0 ? 1 : -1;
     if (pwm==0) dirTarget=0;                                                    //target direction
     int dirCurrent=0;                                                           //current direction
-    int pwmCurrent=0;                                                           //current absolute power
-    if(digitalRead(pinForward)==1)  {dirCurrent=1;  pwmCurrent=*regForward;}    //if is going forward read forward register
-    if(digitalRead(pinBackward)==1) {dirCurrent=-1; pwmCurrent=*regBackward;}   //if is going backward read backward register
-
+    int pwmBack=0; 
+    int pwmFront=0;   
+    int pwmCurrent=0;
+    digitalWrite(pinForward,1);    
+    digitalWrite(pinBackward,1);
+    pwmBack=*regBackward;
+    pwmFront=*regForward;                                                      //current absolute power
+    if(pwmFront>0){dirCurrent=1;  pwmCurrent=pwmFront;}    //if is going forward read forward register
+    else if(pwmBack>0) {dirCurrent=-1; pwmCurrent=-pwmBack;}   //if is going backward read backward register
+    else {dirCurrent=0;}
+    //Serial.print("read pwm ");
+    //Serial.print(pwmCurrent);
     if(pwmCurrent==0)                                                           //if current pwm is zero stop everything
         {
             *regForward=0;                                                      //update register
             *regBackward=0;                                                     //update register
-            digitalWrite(pinForward,0);                                         //update dir pin
-            digitalWrite(pinBackward,0);                                        //update dir pin
-            if(dirTarget==1)   digitalWrite(pinForward,1);                      
-            if(dirTarget==-1)  digitalWrite(pinBackward,1);
+            if(dirTarget>0) dirCurrent=1;
+            if(dirTarget<0) dirCurrent=-1;
+            //Serial.print("changing dir");
+
         }
     if(dirTarget!=dirCurrent)                                                   //if needs to change direction decrease current power     
         {
+            //Serial.print("stopping");
+            if(dirCurrent>0) 
+            {
             pwmCurrent-=PWM_STEP;                                               //decrease current pwm
             if(pwmCurrent<=0) pwmCurrent=0;                                     //but not below 0 because it's stupid
-            
+            }
+            else 
+            {
+            pwmCurrent+=PWM_STEP;                                               //decrease current pwm
+            if(pwmCurrent>=0) pwmCurrent=0;
+            }
         }
         else                                                                    //else it needs to change speed
         {
             if(pwmCurrent>pwmTarget)                                            //if slowing down
-            {
+            {   //Serial.print("slowing");
+              
+                
                 if(pwmCurrent-pwmTarget<PWM_STEP) pwmCurrent=pwmTarget;         //if very close just write the value
                 else pwmCurrent-=PWM_STEP;                                      //else ramp down
             }
             else                                                                //speeding up
             {
+                //Serial.print("accelerating");
                 if(pwmTarget-pwmCurrent<PWM_STEP) pwmCurrent=pwmTarget;         //if very close just write the value
                 else pwmCurrent+=PWM_STEP;                                      //else ramp up
             }
@@ -74,7 +95,23 @@ void runBTS(int pwm, int pinForward, int pinBackward, volatile uint16_t* regForw
         }
                                                                    
     if(dirCurrent==1) {*regForward=pwmCurrent; *regBackward=0;}         //update registers
-    if(dirCurrent==-1){*regForward=0; *regBackward=pwmCurrent;}         //update registers
+    if(dirCurrent==-1){*regForward=0; *regBackward=-pwmCurrent;}         //update registers
+    /*Serial.print(" current pwm ");
+    Serial.print(pwmCurrent);
+    Serial.print(" target pwm ");
+    Serial.print(pwmTarget);
+    Serial.print(" pwmFront ");
+    Serial.print(pwmFront);
+    Serial.print(" pwm back ");
+    Serial.print(pwmBack);
+    Serial.print(" dir current ");
+    Serial.print(dirCurrent);
+    Serial.print(" dir target ");
+    Serial.println(dirTarget);
+    */
+ 
+    
+
 }
 
 void runMotorsWithPWM(int pwmLF, int pwmLR, int pwmRF, int pwmRR)

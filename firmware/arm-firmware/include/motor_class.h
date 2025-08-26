@@ -13,7 +13,7 @@ class MotorDriver
     int targetSpeed;
     int targetDir;
     int currentDir;
-    int speedStep=10;;
+    int speedStep=20;;
     int position;
     int tempPosition;
     
@@ -39,7 +39,7 @@ class MotorDriver
     {
         targetDir=tempSpeed>0 ? 1 : -1;
         targetSpeed=tempSpeed;
-        Serial.print("setting speed ");
+        //Serial.print("setting speed ");
     }
 
     int setPosition(int tempPosition, int tempSpeed)
@@ -67,20 +67,22 @@ class MotorDriver
         {
             if(currentSpeed>targetSpeed)                                            //if slowing down
             {
-                Serial.print(" deccel ");
+                //Serial.print(" deccel ");
                 if(currentSpeed-targetSpeed<speedStep) currentSpeed=targetSpeed;         //if very close just write the value
                 else currentSpeed-=speedStep;                                      //else ramp down
             }
             else                                                                //speeding up
             {
-                Serial.print(" accel ");
+                //Serial.print(" accel ");
                 if(targetSpeed-currentSpeed<speedStep) currentSpeed=targetSpeed;         //if very close just write the value
                 else currentSpeed+=speedStep;                                      //else ramp up
             }
 
         }
                                                                    
-    analogWrite(enablePin, map(abs(currentSpeed),0,100,MINPWM,255));         //update registers
+    if (currentSpeed!=0) analogWrite(enablePin, map(abs(currentSpeed),0,100,MINPWM,255));         //update registers   
+    else analogWrite(enablePin,0);
+    
     if(currentSpeed>0) {digitalWrite(dirPin1,1);digitalWrite(dirPin2,0);}
     if(currentSpeed<0) {digitalWrite(dirPin1,0);digitalWrite(dirPin2,1);}
 

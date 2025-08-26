@@ -13,9 +13,9 @@
 //6-gripper
 //7-shovel
 
-ServoDriver rotate(SERVO_1,0,SENS_SERVO_1,SERVO_ENABLE_1,1);
-ServoDriver wrist(SERVO_2,0,SENS_SERVO_2,SERVO_ENABLE_2,1);;
-ServoDriver shovel(SERVO_3,0,SENS_SERVO_3,SERVO_ENABLE_3,1);;
+ServoDriver rotate(SERVO_1,0,SENS_SERVO_1,SERVO_ENABLE_1,1,0,180);
+ServoDriver wrist(SERVO_2,0,SENS_SERVO_2,SERVO_ENABLE_2,1,60,120);
+ServoDriver shovel(SERVO_3,0,SENS_SERVO_3,SERVO_ENABLE_3,1,0,180);
 MotorDriver base(IN_A_A_1, IN_A_A_2, ENABLE_A_A, SENS_A_A,1);
 MotorDriver arm(IN_A_B_1, IN_A_B_2, ENABLE_A_B, SENS_A_B,1);;
 MotorDriver elbow(IN_B_A_1, IN_B_A_2, ENABLE_B_A, SENS_B_A,1);
@@ -35,15 +35,15 @@ void executePWM(const StaticJsonDocument<CAPACITY>& doc)
     base.setSpeed(baseData);
     arm.setSpeed(armData);
     elbow.setSpeed(elbowData);
-    wrist.moveTo(wristData,1);
-    rotate.moveTo(rotateData,1);
+    wrist.setSpeed(-wristData);
+    rotate.setSpeed(rotateData);
     gripper.setSpeed(gripperData);
-    shovel.moveTo(shovelData,1);
+    shovel.setSpeed(shovelData);
 }
 
 void runMotors()
 {
-    Serial.print(" inside run motors ");
+    //Serial.print(" inside run motors ");
     base.update();
     arm.update();
     elbow.update();
