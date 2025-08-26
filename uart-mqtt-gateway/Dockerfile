@@ -12,7 +12,7 @@ COPY src ./src
 RUN chmod +x ./gradlew
 
 # Build the application (compiles, tests, and creates the JAR)
-RUN ./gradlew build --no-daemon
+RUN ./gradlew bootJar -x test
 
 # Stage 2: Create the final, minimal image
 FROM amazoncorretto:21-alpine

@@ -116,25 +116,21 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     }
 
     private List<SerialPort> getAllAvailablePorts() {
-        List<SerialPort> availablePorts = Arrays.asList(SerialPort.getCommPorts()).stream()
-            .filter(port -> properties.getSerial().getAllowedPortNamePrefixes().stream()
-                    .anyMatch(prefix -> isPortPathAllowed(port, prefix))
+        List<SerialPort> availablePorts = Arrays.asList(SerialPort.getCommPorts());
+
+        return Stream.concat(
+            availablePorts.stream()
+                .filter(port -> properties.getSerial().getAllowedPortPrefixPattern().stream()
+                    .anyMatch(prefix -> isPortPathAllowed(port, prefix))),
+            availablePorts.stream()
+                .filter(port -> properties.getSerial().getAllowedPortRegexPattern().stream()
+                    .anyMatch(regex -> port.getSystemPortPath().matches(regex)))
             )
             .collect(Collectors.toList());
-        return availablePorts;
     }
 
     boolean isPortPathAllowed(SerialPort port, String prefix) {
         final var portPath = port.getSystemPortPath();
-        return portPath.startsWith(prefix)
-            || regexMatch(portPath, prefix);
-    }
-
-    static boolean regexMatch(String port, String prefix) {
-        if (!prefix.startsWith("regex:")) {
-            return false;
-        }
-        final var regex = prefix.replace("regex:", "");
-        return port.matches(regex);
+        return portPath.startsWith(prefix);
     }
 }
