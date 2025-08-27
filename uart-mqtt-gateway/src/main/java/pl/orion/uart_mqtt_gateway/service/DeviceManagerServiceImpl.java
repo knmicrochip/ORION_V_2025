@@ -36,7 +36,6 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
 
     private Map<String, DeviceHandler> managedDevices = new ConcurrentHashMap<>(5);
 
-
     @PreDestroy
     @Override
     public void stop() {
@@ -47,10 +46,11 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     @Scheduled(fixedRateString = "${uart-mqtt-gateway.serial.scan-interval-ms}", initialDelayString = "${uart-mqtt-gateway.serial.scan-interval-ms}")
     public void scan() {
         List<SerialPort> availablePorts = getAllAvailablePorts();
+        log.debug("Port candidates for processing={}", availablePorts.stream().map(SerialPort::getSystemPortPath).collect(Collectors.toList()));
+
         final var unconnectedPorts = availablePorts.stream()
             .filter(port -> !managedDevices.containsKey(port.getSystemPortPath()))
             .toList();
-
 
         final var unidentifiedUnconnectedDevices = unconnectedPorts.stream()
             .map(this::startDeviceIdentification);
@@ -118,19 +118,21 @@ public class DeviceManagerServiceImpl implements DeviceManagerService {
     private List<SerialPort> getAllAvailablePorts() {
         List<SerialPort> availablePorts = Arrays.asList(SerialPort.getCommPorts());
 
+        log.debug("Detected all port paths: {}", availablePorts.stream()
+            .map(SerialPort::getSystemPortPath)
+            .toList()
+        );
+
         return Stream.concat(
             availablePorts.stream()
                 .filter(port -> properties.getSerial().getAllowedPortPrefixPattern().stream()
-                    .anyMatch(prefix -> isPortPathAllowed(port, prefix))),
+                    .peek(prefix -> log.trace("[PREFIX] PORT=[{}], prefix=[{}]", port.getSystemPortPath(), prefix))
+                    .anyMatch(prefix -> port.getSystemPortPath().startsWith(prefix))),
             availablePorts.stream()
                 .filter(port -> properties.getSerial().getAllowedPortRegexPattern().stream()
+                    .peek(regex -> log.trace("[REGEX] PORT=[{}], regex=[{}]", port.getSystemPortPath(), regex))
                     .anyMatch(regex -> port.getSystemPortPath().matches(regex)))
             )
             .collect(Collectors.toList());
-    }
-
-    boolean isPortPathAllowed(SerialPort port, String prefix) {
-        final var portPath = port.getSystemPortPath();
-        return portPath.startsWith(prefix);
     }
 }

@@ -39,7 +39,7 @@ services:
       - MQTT_USERNAME=${MQTT_USERNAME:-user}
       - MQTT_PASSWORD=${MQTT_PASSWORD:-user}
       - UART_MQTT_GATEWAY_MQTT_BROKER_URL=mqtt5
-      - UART_MQTT_GATEWAY_SERIAL_ALLOWED_PORT_NAME_PREFIXES="/dev/ttyUSB,regex:/dev/ttyACM[3-9]"
+      - UART_MQTT_GATEWAY_SERIAL_ALLOWED_PORT_NAME_PREFIXES=/dev/ttyUSB,regex:/dev/ttyACM[3-9]
     depends_on:
       - mqtt5
     ports:
