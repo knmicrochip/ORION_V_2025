@@ -22,4 +22,4 @@ ENV MQTT_PASSWORD=user
 
 EXPOSE 8880
 
-ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx256m", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx512m", "-jar", "app.jar"]

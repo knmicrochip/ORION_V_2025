@@ -31,4 +31,4 @@ EXPOSE 8088
 HEALTHCHECK --interval=1s --timeout=2s --start-period=30s \
    CMD [ "$(wget --server-response --spider --quiet localhost:8088/actuator/health 2>&1 | awk 'NR==1{print $2}')" = "200" ]
 
-ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx256m", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx512m", "-jar", "app.jar"]
